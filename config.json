@@ -1,0 +1,8 @@
+{
+  "root": "/mnt/datasets/RT-GENE",
+  "logs": "/mnt/results/logs",
+  "batch_size": 1024,
+  "workers": 4,
+  "device": "cuda:0",
+  "epochs": 1000
+}
