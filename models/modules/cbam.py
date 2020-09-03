@@ -36,7 +36,6 @@ class SpatialGate(nn.Module):
         self.conv = nn.Sequential(
             nn.Conv2d(in_channels=2, out_channels=1, kernel_size=7, stride=1, padding=3),
             nn.BatchNorm2d(1, eps=1e-5, momentum=0.01, affine=True),
-            # nn.ReLU(),
         )
         self.sigmoid = nn.Sigmoid()
 
