@@ -8,13 +8,15 @@ import torch.utils.tensorboard as tensorboard
 import torchvision.models as models
 import torchvision.transforms as transforms
 
-
 import datasets.rtgene as rtgene
+# import models.resnet as resnet
+import models.eyenet as eyenet
 import modules.modules as mm
 import utils
 
 trainlist = ['s001', 's002', 's003', 's004', 's005', 's006', 's007', 's008', 's009', 's010', 's011', 's012', 's013']
 validlist = ['s014', 's015', 's016']
+inferlist = ['s000']
 
 
 def main(args):
@@ -29,20 +31,19 @@ def main(args):
     trainloader = dataloader.DataLoader(trainset, batch_size=args.batch_size, shuffle=True, num_workers=args.workers)
     validloader = dataloader.DataLoader(validset, batch_size=args.batch_size, shuffle=False, num_workers=args.workers)
 
-    model = models.resnet101(pretrained=True)
-    for param in model.parameters():
-        param.requires_grad = False
+    model = eyenet.EyeNet(features=models.vgg16().to(args.device).features, mid_out=False)
+    # for param in model.parameters():
+    #     param.requires_grad = False
 
-    model.fc = nn.Linear(model.fc.in_features, 2)
+    # model.fc = nn.Linear(model.fc.in_features, 2)
     model = nn.DataParallel(model).to(args.device)
-
 
     criterion = nn.MSELoss()
     evaluator = mm.AngleAccuracy()
     optimizer = optim.Adam(model.parameters(), lr=0.01, betas=(0.9, 0.95))
     scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=30, gamma=0.1)
 
-    writer = tensorboard.SummaryWriter(os.path.join(args.logs, 'resnet101'))
+    writer = tensorboard.SummaryWriter(os.path.join(args.logs, 'rt-gene-vgg16'))
 
     for epoch in range(args.epochs):
         args.epoch = epoch
@@ -57,10 +58,11 @@ def train(dataloader, model, criterion, evaluator, optimizer, writer, args):
 
     model.train()
     for i, batch in enumerate(dataloader):
-        inputs, headpose, targets = batch
-        inputs, headpose, targets = inputs.to(args.device), headpose.to(args.device), targets.to(args.device)
+        _, left, right, headpose, targets = batch
+        left, right, headpose = left.to(args.device), right.to(args.device), headpose.to(args.device)
+        targets = targets.to(args.device)
 
-        outputs = model(inputs)
+        outputs, _, _ = model(left, right, headpose)
         loss = criterion(outputs, targets)
         accuracy = evaluator(outputs, targets)
 
@@ -80,10 +82,11 @@ def validate(dataloader, model, criterion, evaluator, writer, args):
     model.eval()
     with torch.no_grad():
         for i, batch in enumerate(dataloader):
-            inputs, headpose, targets = batch
-            inputs, headpose, targets = inputs.to(args.device), headpose.to(args.device), targets.to(args.device)
+            _, left, right, headpose, targets = batch
+            left, right, headpose = left.to(args.device), right.to(args.device), headpose.to(args.device)
+            targets = targets.to(args.device)
 
-            outputs = model(inputs)
+            outputs, _, _ = model(left, right, headpose)
             loss = criterion(outputs, targets)
             accuracy = evaluator(outputs, targets)
 

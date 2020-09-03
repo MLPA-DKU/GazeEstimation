@@ -10,7 +10,9 @@ class RTGENE(VisionDataset):
     def __init__(self, root, transform=None, target_transform=None, subjects=None):
         super(RTGENE, self).__init__(root, transform=transform, target_transform=target_transform)
 
-        self.data = []
+        self.face = []
+        self.left = []
+        self.right = []
         self.headpose = []
         self.gaze = []
 
@@ -20,11 +22,15 @@ class RTGENE(VisionDataset):
                 lines = f.readlines()
                 for line in lines:
                     split = line.split(',')
-                    face_image = os.path.join(subject_folder, 'inpainted', 'face', f'face_{int(split[0]):06d}_rgb.png')
-                    if os.path.exists(face_image):
+                    face = os.path.join(subject_folder, 'inpainted', 'face', f'face_{int(split[0]):06d}_rgb.png')
+                    left = os.path.join(subject_folder, 'inpainted', 'left', f'left_{int(split[0]):06d}_rgb.png')
+                    right = os.path.join(subject_folder, 'inpainted', 'right', f'right_{int(split[0]):06d}_rgb.png')
+                    if os.path.exists(face) and os.path.exists(left) and os.path.exists(right):
                         headpose = (float(split[1].strip()[1:]), float(split[2].strip()[:-1]))
                         gaze = (float(split[3].strip()[1:]), float(split[4].strip()[:-1]))
-                    self.data.append(face_image)
+                    self.face.append(face)
+                    self.left.append(left)
+                    self.right.append(right)
                     self.headpose.append(headpose)
                     self.gaze.append(gaze)
 
@@ -32,22 +38,27 @@ class RTGENE(VisionDataset):
         self.gaze = np.vstack(self.gaze).astype(np.float32)
 
     def __getitem__(self, index):
-        image, headpose, target = self.data[index], self.headpose[index], self.gaze[index]
+        face, left, right = self.face[index], self.left[index], self.right[index]
+        headpose, gaze = self.headpose[index], self.gaze[index]
 
         # doing this so that it is consistent with all other datasets
         # to return a PIL Image
-        image = np.array(Image.open(image).convert('RGB'))
+        face = np.array(Image.open(face).convert('RGB'))
+        left = np.array(Image.open(left).convert('RGB'))
+        right = np.array(Image.open(right).convert('RGB'))
 
         if self.transform is not None:
-            image = self.transform(image)
+            face = self.transform(face)
+            left = self.transform(left)
+            right = self.transform(right)
 
         if self.target_transform is not None:
-            target = self.target_transform(target)
+            gaze = self.target_transform(gaze)
 
-        return image, headpose, target
+        return face, left, right, headpose, gaze
 
     def __len__(self):
-        return len(self.data)
+        return len(self.gaze)
 
 
 # if __name__ == '__main__':
