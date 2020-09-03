@@ -7,7 +7,7 @@ from torchvision.datasets import VisionDataset
 
 class RTGENE(VisionDataset):
 
-    def __init__(self, root, transform=None, target_transform=None, subjects=None):
+    def __init__(self, root, transform=None, target_transform=None, subjects=None, data_type=None):
         super(RTGENE, self).__init__(root, transform=transform, target_transform=target_transform)
 
         self.face = []
@@ -37,9 +37,15 @@ class RTGENE(VisionDataset):
         self.headpose = np.vstack(self.headpose).astype(np.float32)
         self.gaze = np.vstack(self.gaze).astype(np.float32)
 
+        self.data_type = ['face', 'left', 'right', 'headpose', 'gaze'] if data_type is None else data_type
+
     def __getitem__(self, index):
-        face, left, right = self.face[index], self.left[index], self.right[index]
-        headpose, gaze = self.headpose[index], self.gaze[index]
+
+        face = self.face[index]
+        left = self.left[index]
+        right = self.right[index]
+        headpose = self.headpose[index]
+        gaze = self.gaze[index]
 
         # doing this so that it is consistent with all other datasets
         # to return a PIL Image
@@ -53,24 +59,13 @@ class RTGENE(VisionDataset):
             right = self.transform(right)
 
         if self.target_transform is not None:
+            headpose = self.target_transform(headpose)
             gaze = self.target_transform(gaze)
 
-        return face, left, right, headpose, gaze
+        data = {'face': face, 'left': left, 'right': right, 'headpose': headpose, 'gaze': gaze}
+        batch = tuple([data[k] for k in self.data_type])
+
+        return batch
 
     def __len__(self):
         return len(self.gaze)
-
-
-# if __name__ == '__main__':
-#     import torch.utils.data
-#     import torchvision.transforms as transforms
-#     transform = transforms.Compose([
-#         transforms.ToTensor()
-#     ])
-#     dataset = RTGENE('/Users/winterchild/Downloads/RT-GENE', transform=transform, subjects=['s000', 's001'])
-#     dataloader = torch.utils.data.DataLoader(dataset, batch_size=32, shuffle=True, drop_last=True)
-#
-#     for i, batch in enumerate(dataloader):
-#         face, headpose, gaze = batch
-#
-#     print('')
