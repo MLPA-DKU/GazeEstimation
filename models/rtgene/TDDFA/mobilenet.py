@@ -1,9 +1,4 @@
-#!/usr/bin/env python3
-# coding: utf-8
-
-from __future__ import division
-
-""" 
+"""
 Creates a MobileNet Model as defined in:
 Andrew G. Howard Menglong Zhu Bo Chen, et.al. (2017). 
 MobileNets: Efficient Convolutional Neural Networks for Mobile Vision Applications. 
@@ -44,12 +39,8 @@ class DepthWiseBlock(nn.Module):
 
 
 class MobileNet(nn.Module):
+
     def __init__(self, widen_factor=1.0, num_classes=1000, prelu=False, input_channel=3):
-        """ Constructor
-        Args:
-            widen_factor: config of widen_factor
-            num_classes: number of classes
-        """
         super(MobileNet, self).__init__()
 
         block = DepthWiseBlock
@@ -118,13 +109,6 @@ class MobileNet(nn.Module):
 
 
 def mobilenet(widen_factor=1.0, num_classes=1000):
-    """
-    Construct MobileNet.
-    widen_factor=1.0  for mobilenet_1
-    widen_factor=0.75 for mobilenet_075
-    widen_factor=0.5  for mobilenet_05
-    widen_factor=0.25 for mobilenet_025
-    """
     model = MobileNet(widen_factor=widen_factor, num_classes=num_classes)
     return model
 

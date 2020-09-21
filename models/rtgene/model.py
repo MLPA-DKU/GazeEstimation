@@ -5,9 +5,30 @@ import torch
 import torch.nn as nn
 import torchvision.models as models
 import torchvision.transforms as transforms
-import models.rtgene.standalone.TDDFA.mobilenet_v1 as mobilenet_v1
-import models.rtgene.standalone.TDDFA.utils.ddfa as ddfa
-import models.rtgene.standalone.TDDFA.utils.inference as inf
+import models.rtgene.TDDFA.mobilenet as mobilenet
+import models.rtgene.TDDFA.utils.inference as inf
+
+
+class ToTensorGjz(object):
+
+    def __call__(self, pic):
+        if isinstance(pic, np.ndarray):
+            img = torch.from_numpy(pic.transpose((2, 0, 1)))
+            return img.float()
+
+    def __repr__(self):
+        return self.__class__.__name__ + '()'
+
+
+class NormalizeGjz(object):
+
+    def __init__(self, mean, std):
+        self.mean = mean
+        self.std = std
+
+    def __call__(self, tensor):
+        tensor.sub_(self.mean).div_(self.std)
+        return tensor
 
 
 class EyePatchExtractor:
@@ -17,12 +38,12 @@ class EyePatchExtractor:
         self.device = 'cuda:0' if device is None else device
         self.detection_size = (120, 120)
 
-        self.pretrained_model = getattr(mobilenet_v1, 'mobilenet_1')(num_classes=62)
+        self.pretrained_model = getattr(mobilenet, 'mobilenet_1')(num_classes=62)
         self.initialize_pretrained_model('TDDFA/models/phase1_wpdc_vdc.pth.tar')
         self.face_landmark = dlib.shape_predictor('TDDFA/models/shape_predictor_68_face_landmarks.dat')
         self.face_detector = dlib.get_frontal_face_detector()
 
-        self.transform = transforms.Compose([ddfa.ToTensorGjz(), ddfa.NormalizeGjz(mean=127.5, std=128)])
+        self.transform = transforms.Compose([ToTensorGjz(), NormalizeGjz(mean=127.5, std=128)])
 
         self.eye_indices = np.array([36, 39, 42, 45])
         self.eye_patches_size = (60, 36)
@@ -94,24 +115,24 @@ class GazeEstimator(nn.Module):
     def __init__(self, pretrained=False, device=None):
         super(GazeEstimator, self).__init__()
         self.device = 'cuda:0' if device is None else device
-        self.backbone_l = models.vgg16(pretrained=pretrained).to(self.device).features
-        self.backbone_r = models.vgg16(pretrained=pretrained).to(self.device).features
+        self.backbone_l = models.vgg16(pretrained=pretrained).features.to(self.device)
+        self.backbone_r = models.vgg16(pretrained=pretrained).features.to(self.device)
         self.avgpool = nn.AdaptiveAvgPool2d(1)
         self.linear_l = nn.Sequential(
             nn.Linear(512, 1024),
-            nn.BatchNorm2d(1024),
+            nn.BatchNorm1d(1024),
             nn.ReLU(),
         )
         self.linear_r = nn.Sequential(
             nn.Linear(512, 1024),
-            nn.BatchNorm2d(1024),
+            nn.BatchNorm1d(1024),
             nn.ReLU(),
         )
         self.linear_x = nn.Sequential(
             nn.Linear(2048, 512),
         )
         self.predictor = nn.Sequential(
-            nn.BatchNorm2d(514),
+            nn.BatchNorm1d(514),
             nn.ReLU(),
             nn.Linear(514, 256),
             nn.Linear(256, 2),
@@ -134,3 +155,31 @@ class GazeEstimator(nn.Module):
         x = torch.cat((x, h), dim=1)
         gaze_prediction = self.predictor(x)
         return gaze_prediction
+
+
+class RTGENE(nn.Module):
+
+    def __init__(self, pretrained=False, device=None):
+        super(RTGENE, self).__init__()
+        self.device = device
+        self.extractor = EyePatchExtractor()
+        self.estimator = GazeEstimator(pretrained=pretrained, device=device)
+        self.transform = transforms.Compose([
+            transforms.ToTensor(), transforms.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))
+        ])
+
+    def forward(self, image, headpose):
+        left, right = self.extractor(image)
+        left, right = self.transform(left).unsqueeze(0), self.transform(right).unsqueeze(0)
+        left, right = left.to(self.device), right.to(self.device)
+        predictions = self.estimator(left, right, headpose)
+        return predictions
+
+
+if __name__ == '__main__':
+    import datasets.rtgene as rtgene
+    dataset = rtgene.RTGENE('/mnt/datasets/RT-GENE', subjects=['s007'], data_type=['raw'])
+    sample = dataset[882]
+    raw_image = sample[0]
+
+    print('')

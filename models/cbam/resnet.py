@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-import models.modules.cbam as cbam
+import models.cbam.cbam as cbam
 from torchvision.models.utils import load_state_dict_from_url
 
 
