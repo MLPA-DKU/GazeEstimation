@@ -33,12 +33,3 @@ def get_model_inference_time(model, iterations=10, batch_size=8, resolution=None
     print(f'inference time (gpu): {gpu_time_ms:7.1f} ms'.center(width))
     print(f'inference time (total): {cpu_time_ms + gpu_time_ms:5.1f} ms'.center(width))
     print(f'=' * width)
-
-
-class InferenceTimeBenchmark:
-
-    def __init__(self, arch, spec):
-        pass
-
-    def __call__(self, model, iterations=10, batch_size=8, input_shape=None, device=None):
-        pass

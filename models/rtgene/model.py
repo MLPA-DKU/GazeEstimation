@@ -43,7 +43,10 @@ class EyePatchExtractor:
         self.face_landmark = dlib.shape_predictor('TDDFA/models/shape_predictor_68_face_landmarks.dat')
         self.face_detector = dlib.get_frontal_face_detector()
 
-        self.transform = transforms.Compose([ToTensorGjz(), NormalizeGjz(mean=127.5, std=128)])
+        self.transform = transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Normalize(mean=0.498, std=0.5),
+        ])
 
         self.eye_indices = np.array([36, 39, 42, 45])
         self.eye_patches_size = (60, 36)
@@ -177,9 +180,26 @@ class RTGENE(nn.Module):
 
 
 if __name__ == '__main__':
+    import time
     import datasets.rtgene as rtgene
+    import matplotlib.pyplot as plt
     dataset = rtgene.RTGENE('/mnt/datasets/RT-GENE', subjects=['s007'], data_type=['raw'])
-    sample = dataset[882]
+    sample = dataset[3324]
     raw_image = sample[0]
+
+    plt.imshow(raw_image)
+    plt.axis('off')
+    plt.show()
+
+    t1 = time.time()
+    extractor = EyePatchExtractor()  # time benchmark result ~3.10 s
+    t2 = time.time()
+
+    print(f'{t2 - t1}')
+    l, r = extractor(raw_image)
+
+    plt.imshow(l)
+    plt.axis('off')
+    plt.show()
 
     print('')
