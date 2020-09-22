@@ -9,28 +9,6 @@ import models.rtgene.TDDFA.mobilenet as mobilenet
 import models.rtgene.TDDFA.utils.inference as inf
 
 
-class ToTensorGjz(object):
-
-    def __call__(self, pic):
-        if isinstance(pic, np.ndarray):
-            img = torch.from_numpy(pic.transpose((2, 0, 1)))
-            return img.float()
-
-    def __repr__(self):
-        return self.__class__.__name__ + '()'
-
-
-class NormalizeGjz(object):
-
-    def __init__(self, mean, std):
-        self.mean = mean
-        self.std = std
-
-    def __call__(self, tensor):
-        tensor.sub_(self.mean).div_(self.std)
-        return tensor
-
-
 class EyePatchExtractor:
 
     def __init__(self, device=None):
@@ -115,11 +93,11 @@ class EyePatchExtractor:
 
 class GazeEstimator(nn.Module):
 
-    def __init__(self, pretrained=False, device=None):
+    def __init__(self, arch, pretrained=False, device=None):
         super(GazeEstimator, self).__init__()
         self.device = 'cuda:0' if device is None else device
-        self.backbone_l = models.vgg16(pretrained=pretrained).features.to(self.device)
-        self.backbone_r = models.vgg16(pretrained=pretrained).features.to(self.device)
+        self.backbone_l = self.initialize_backbone(arch, pretrained=pretrained).to(device)
+        self.backbone_r = self.initialize_backbone(arch, pretrained=pretrained).to(device)
         self.avgpool = nn.AdaptiveAvgPool2d(1)
         self.linear_l = nn.Sequential(
             nn.Linear(512, 1024),
@@ -159,6 +137,17 @@ class GazeEstimator(nn.Module):
         gaze_prediction = self.predictor(x)
         return gaze_prediction
 
+    def initialize_backbone(self, arch, pretrained=False):
+        backbone = getattr(models, arch)(pretrained=pretrained)
+
+        if arch.startswith('resnet'):
+            modules = list(backbone.children())[:-2]
+            backbone = nn.Sequential(*modules)
+        elif arch.startswith('vgg'):
+            backbone = backbone.features
+
+        return backbone
+
 
 class RTGENE(nn.Module):
 
@@ -166,7 +155,7 @@ class RTGENE(nn.Module):
         super(RTGENE, self).__init__()
         self.device = device
         self.extractor = EyePatchExtractor()
-        self.estimator = GazeEstimator(pretrained=pretrained, device=device)
+        self.estimator = GazeEstimator(arch='vgg16', pretrained=pretrained, device=device)
         self.transform = transforms.Compose([
             transforms.ToTensor(), transforms.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))
         ])
@@ -177,29 +166,3 @@ class RTGENE(nn.Module):
         left, right = left.to(self.device), right.to(self.device)
         predictions = self.estimator(left, right, headpose)
         return predictions
-
-
-if __name__ == '__main__':
-    import time
-    import datasets.rtgene as rtgene
-    import matplotlib.pyplot as plt
-    dataset = rtgene.RTGENE('/mnt/datasets/RT-GENE', subjects=['s007'], data_type=['raw'])
-    sample = dataset[3324]
-    raw_image = sample[0]
-
-    plt.imshow(raw_image)
-    plt.axis('off')
-    plt.show()
-
-    t1 = time.time()
-    extractor = EyePatchExtractor()  # time benchmark result ~3.10 s
-    t2 = time.time()
-
-    print(f'{t2 - t1}')
-    l, r = extractor(raw_image)
-
-    plt.imshow(l)
-    plt.axis('off')
-    plt.show()
-
-    print('')

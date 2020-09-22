@@ -31,7 +31,7 @@ def main(args):
     trainloader = dataloader.DataLoader(trainset, batch_size=args.batch_size, shuffle=True, num_workers=args.workers)
     validloader = dataloader.DataLoader(validset, batch_size=args.batch_size, shuffle=False, num_workers=args.workers)
 
-    model = models.GazeEstimator(pretrained=True, device=args.device)
+    model = models.GazeEstimator(arch='resnet34', pretrained=True, device=args.device)
     model = nn.DataParallel(model).to(args.device)
 
     criterion = nn.MSELoss()
@@ -39,7 +39,7 @@ def main(args):
     optimizer = optim.Adam(model.parameters(), lr=0.005, betas=(0.9, 0.95))
     scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=30, gamma=0.1)
 
-    writer = tensorboard.SummaryWriter(os.path.join(args.logs, 'rt-gene-vgg16'))
+    writer = tensorboard.SummaryWriter(os.path.join(args.logs, 'rt-gene-resnet34'))
 
     for epoch in range(args.epochs):
         args.epoch = epoch
