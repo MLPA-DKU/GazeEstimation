@@ -66,11 +66,3 @@ class RTGENE(VisionDataset):
 
     def __len__(self):
         return len(self.data)
-
-
-import time
-
-def duration(f, trials):
-    elapsed_time = []
-    for i in range(trials):
-        t1 = time.time()
