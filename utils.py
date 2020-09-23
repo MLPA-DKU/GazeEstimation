@@ -1,5 +1,7 @@
 import os
 import json
+import shutil
+import torch
 
 
 def read_json(filename):
@@ -53,3 +55,9 @@ class ConfigParser(DotDict):
         assert all([k not in module_args for k in kwargs])
         module_args.update(kwargs)
         return getattr(module, module_name)(*args, **module_args)
+
+
+def save_checkpoint(state, is_best, filename='checkpoint.pth.tar'):
+    torch.save(state, filename)
+    if is_best:
+        shutil.copyfile(filename, 'model_best.pth.tar')

@@ -19,3 +19,22 @@ class AngleAccuracy:
 
             angle_rad = (pred_x * true_x + pred_y * true_y + pred_z * true_z) / (true_n * pred_n)
             return torch.mean(torch.acos(angle_rad) * 180.0 / math.pi)
+
+
+class ClassificationAccuracy:
+
+    def __call__(self, inputs, targets, topk=(1,)):
+
+        with torch.no_grad():
+            maxk = max(topk)
+            batch_size = targets.size(0)
+
+            _, pred = inputs.topk(maxk, 1, True, True)
+            pred = pred.t()
+            correct = pred.eq(targets.view(1, -1).expand_as(pred))
+
+            res = []
+            for k in topk:
+                correct_k = correct[:k].reshape(-1).float().sum(0, keepdim=True)
+                res.append(correct_k.mul_(100.0 / batch_size))
+            return res
