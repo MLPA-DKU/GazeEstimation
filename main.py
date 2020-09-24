@@ -20,6 +20,8 @@ inferlist = ['s000']
 
 def main(args):
 
+    best_score = np.inf
+
     transform = transforms.Compose([
         transforms.ToTensor(),
         transforms.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))
@@ -32,7 +34,7 @@ def main(args):
     trainloader = dataloader.DataLoader(trainset, batch_size=args.batch_size, shuffle=True, num_workers=args.workers)
     validloader = dataloader.DataLoader(validset, batch_size=args.batch_size, shuffle=False, num_workers=args.workers)
 
-    model = models.resnet50(pretrained=True)
+    model = models.resnet152(pretrained=True)
     model.fc = nn.Linear(in_features=model.fc.in_features, out_features=2)
     model = nn.DataParallel(model).to(args.device)
 
@@ -41,7 +43,7 @@ def main(args):
     optimizer = optim.Adam(model.parameters(), lr=0.01, betas=(0.9, 0.95))
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, cooldown=10)
 
-    writer = tensorboard.SummaryWriter(os.path.join(args.logs, 'head-pose-resnet50-lr0.01'))
+    writer = tensorboard.SummaryWriter(os.path.join(args.logs, 'rt-gene-resnet152'))
 
     for epoch in range(args.epochs):
         args.epoch = epoch
@@ -50,6 +52,12 @@ def main(args):
         scheduler.step(score)
         writer.add_scalar('learning rate', optimizer.param_groups[0]['lr'], epoch)
 
+        is_best = score < best_score
+        best_score = min(score, best_score)
+
+        utils.save_checkpoint(model, is_best, '.save/model.pth')
+
+
     writer.close()
 
 
@@ -57,12 +65,12 @@ def train(dataloader, model, criterion, evaluator, optimizer, writer, args):
 
     model.train()
     for i, batch in enumerate(dataloader):
-        face, headpose, _ = batch
-        face, headpose = face.to(args.device), headpose.to(args.device)
+        face, _, gaze = batch
+        face, gaze = face.to(args.device), gaze.to(args.device)
 
         outputs = model(face)
-        loss = criterion(outputs, headpose)
-        accuracy = evaluator(outputs, headpose)
+        loss = criterion(outputs, gaze)
+        accuracy = evaluator(outputs, gaze)
 
         optimizer.zero_grad()
         loss.backward()
@@ -81,14 +89,15 @@ def validate(dataloader, model, criterion, evaluator, writer, args):
     model.eval()
     with torch.no_grad():
         for i, batch in enumerate(dataloader):
-            face, headpose, _ = batch
-            face, headpose = face.to(args.device), headpose.to(args.device)
+            face, _, gaze = batch
+            face, gaze = face.to(args.device), gaze.to(args.device)
 
             outputs = model(face)
-            loss = criterion(outputs, headpose)
-            accuracy = evaluator(outputs, headpose)
+            loss = criterion(outputs, gaze)
+            accuracy = evaluator(outputs, gaze)
 
             res.append(loss.item())
+            res.append(accuracy.item())
 
             writer.add_scalar('validation loss', loss.item(), args.epoch * len(dataloader) + i)
             writer.add_scalar('validation accuracy', accuracy.item(), args.epoch * len(dataloader) + i)
@@ -96,7 +105,7 @@ def validate(dataloader, model, criterion, evaluator, writer, args):
             print(f'Epoch[{args.epoch + 1:4d}/{args.epochs:4d}] - batch[{i + 1:4d}/{len(dataloader):4d}]'
                   f' - loss: {loss.item():7.3f} - accuracy: {accuracy.item():7.3f}')
 
-    return np.mean(res)
+    return np.nanmean(res)
 
 
 if __name__ == '__main__':

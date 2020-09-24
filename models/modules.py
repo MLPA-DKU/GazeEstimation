@@ -23,7 +23,7 @@ def view(image):
     plt.show()
 
 
-image = Image.open('example.jpg').convert('RGB')
+image = Image.open('../utils/visualization/example.jpg').convert('RGB')
 view(image)
 
 transform = transforms.Compose([
