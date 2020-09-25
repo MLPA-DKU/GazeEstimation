@@ -55,7 +55,7 @@ def main(args):
         is_best = score < best_score
         best_score = min(score, best_score)
 
-        utils.save_checkpoint(model, is_best, '.save/model.pth')
+        utils.save_checkpoint(model, is_best, 'model.pth')
 
     writer.close()
 
