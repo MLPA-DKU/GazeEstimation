@@ -2,6 +2,7 @@ import os
 import json
 import shutil
 import torch
+import matplotlib.pyplot as plt
 
 
 def read_json(filename):
@@ -61,3 +62,9 @@ def save_checkpoint(state, is_best, filename='checkpoint.pth.tar'):
     torch.save(state, filename)
     if is_best:
         shutil.copyfile(filename, '.save/model_best.pth.tar')
+
+
+def view(image):
+    plt.imshow(image)
+    plt.axis('off')
+    plt.show()
