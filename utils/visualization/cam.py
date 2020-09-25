@@ -62,32 +62,38 @@ class GradCam:
     def forward(self, x):
         return self.model(x)
 
-    def __call__(self, image, index=None):
-        features, output = self.model_extractor(image)
-        index = torch.argmax(output).item() if index is None else index
+    def __call__(self, batch, index=None):
+        batch.requires_grad = True
 
-        one_hot = torch.zeros((1, output.size()[-1]))
-        one_hot[0][index] = 1
-        one_hot.requires_grad = True
-        one_hot = torch.sum(one_hot.to(output.device) * output)
+        ret = []
+        for image in batch:
+            image = image.unsqueeze(0)
+            features, output = self.model_extractor(image)
+            index = torch.argmax(output).item() if index is None else index
 
-        self.feature_module.zero_grad()
-        self.model.zero_grad()
-        one_hot.backward(retain_graph=True)
+            one_hot = torch.zeros((1, output.size()[-1]))
+            one_hot[0][index] = 1
+            one_hot.requires_grad = True
+            one_hot = torch.sum(one_hot.to(output.device) * output)
 
-        target = features[-1].squeeze()
-        weights = nn.AdaptiveAvgPool2d(1)(self.model_extractor.get_gradients()[-1]).squeeze()
+            self.feature_module.zero_grad()
+            self.model.zero_grad()
+            one_hot.backward(retain_graph=True)
 
-        mask = torch.zeros(target.shape[1:]).to(weights.device)
-        for i, w in enumerate(weights):
-            mask += w * target[i, :, :]
+            target = features[-1].squeeze()
+            weights = nn.AdaptiveAvgPool2d(1)(self.model_extractor.get_gradients()[-1]).squeeze()
 
-        mask = mask.clamp(0, 1).view(1, 1, mask.shape[0], mask.shape[1])
-        mask = F.interpolate(mask, size=image.shape[2:], mode='bicubic', align_corners=False).squeeze()
-        mask = mask - torch.min(mask)
-        mask = mask / torch.max(mask)
+            mask = torch.zeros(target.shape[1:]).to(weights.device)
+            for i, w in enumerate(weights):
+                mask += w * target[i, :, :]
 
-        return mask
+            mask = mask.clamp(0, 1).view(1, 1, mask.shape[0], mask.shape[1])
+            mask = F.interpolate(mask, size=image.shape[2:], mode='bicubic', align_corners=False).squeeze()
+            mask = mask - torch.min(mask)
+            mask = mask / torch.max(mask)
+            ret.append(mask)
+
+        return torch.stack(ret)
 
 
 def view_activation_map(image, mask, filename='visualized_activation_map.png'):
@@ -107,6 +113,7 @@ def view_activation_map(image, mask, filename='visualized_activation_map.png'):
 
 if __name__ == '__main__':
 
+    import time
     import torchvision.models as models
     import torchvision.transforms as transforms
 
@@ -124,12 +131,17 @@ if __name__ == '__main__':
 
     image = Image.open('example.jpg').convert('RGB').resize((224, 224))
     transformed_image = transform(image).unsqueeze(0)
+    for _ in range(2):
+        transformed_image = torch.cat([transformed_image, transformed_image], dim=0)
     transformed_image = transformed_image.to(device)
-    transformed_image.requires_grad = True
 
     # if target_index = None, returns the map for the highest scoring category.
     # otherwise, targets requires index.
     target_index = None
-    mask = visualizer(transformed_image, target_index)
+    t1 = time.time()
+    mask_list = visualizer(transformed_image, target_index)
+    t2 = time.time()
+    print(f'{t2 - t1:.3f} s')
 
-    view_activation_map(image, mask.detach().cpu().numpy())
+    for i in range(4):
+        view_activation_map(image, mask_list[i].detach().cpu().numpy())
