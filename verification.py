@@ -16,17 +16,6 @@ validlist = ['s014', 's015', 's016']
 inferlist = ['s000']
 
 
-class UnNormalize(object):
-    def __init__(self, mean, std):
-        self.mean = mean
-        self.std = std
-
-    def __call__(self, tensor):
-        for t, m, s in zip(tensor, self.mean, self.std):
-            t.mul_(s).add_(m)
-        return tensor
-
-
 def main():
 
     device = 'cuda:0'
@@ -35,7 +24,7 @@ def main():
         transforms.ToTensor(),
         transforms.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))
     ])
-    undo_normalize = UnNormalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))
+    undo_normalize = helpers.UnNormalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))
 
     data_type = ['face']
 
@@ -89,10 +78,7 @@ def main():
             viz.view_activation_map(image, activation_maps_layer2_pi[i].detach().cpu().numpy())
             viz.view_activation_map(image, activation_maps_layer3_pi[i].detach().cpu().numpy())
             viz.view_activation_map(image, activation_maps_layer4_pi[i].detach().cpu().numpy())
-
-        breakpoint()
-
-        break
+            break
 
 
 if __name__ == '__main__':
