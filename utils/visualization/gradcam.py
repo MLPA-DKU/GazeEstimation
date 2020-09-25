@@ -69,7 +69,7 @@ class GradCam:
         one_hot = torch.zeros((1, output.size()[-1]))
         one_hot[0][index] = 1
         one_hot.requires_grad = True
-        one_hot = torch.sum(one_hot * output)
+        one_hot = torch.sum(one_hot.to(output.device) * output)
 
         self.feature_module.zero_grad()
         self.model.zero_grad()
@@ -78,7 +78,7 @@ class GradCam:
         target = features[-1].squeeze()
         weights = nn.AdaptiveAvgPool2d(1)(self.model_extractor.get_gradients()[-1]).squeeze()
 
-        mask = torch.zeros(target.shape[1:])
+        mask = torch.zeros(target.shape[1:]).to(weights.device)
         for i, w in enumerate(weights):
             mask += w * target[i, :, :]
 
@@ -124,12 +124,12 @@ if __name__ == '__main__':
 
     image = Image.open('example.jpg').convert('RGB').resize((224, 224))
     transformed_image = transform(image).unsqueeze(0)
+    transformed_image = transformed_image.to(device)
     transformed_image.requires_grad = True
-    transformed_image.to(device)
 
     # if target_index = None, returns the map for the highest scoring category.
     # otherwise, targets requires index.
     target_index = None
     mask = visualizer(transformed_image, target_index)
 
-    view_activation_map(image, mask.detach().numpy())
+    view_activation_map(image, mask.detach().cpu().numpy())
