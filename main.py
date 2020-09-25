@@ -4,14 +4,14 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
-import torch.utils.data as dataloader
+import torch.utils.data as loader
 import torch.utils.tensorboard as tensorboard
 import torchvision.models as models
 import torchvision.transforms as transforms
 
 import datasets.rtgene as rtgene
 import modules.modules as mm
-from utils import utils
+import utils.helpers as utils
 
 trainlist = ['s001', 's002', 's003', 's004', 's005', 's006', 's007', 's008', 's009', 's010', 's011', 's012', 's013']
 validlist = ['s014', 's015', 's016']
@@ -31,8 +31,8 @@ def main(args):
 
     trainset = rtgene.RTGENE(root=args.root, transform=transform, subjects=trainlist, data_type=data_type)
     validset = rtgene.RTGENE(root=args.root, transform=transform, subjects=validlist, data_type=data_type)
-    trainloader = dataloader.DataLoader(trainset, batch_size=args.batch_size, shuffle=True, num_workers=args.workers)
-    validloader = dataloader.DataLoader(validset, batch_size=args.batch_size, shuffle=False, num_workers=args.workers)
+    trainloader = loader.DataLoader(trainset, batch_size=args.batch_size, shuffle=True, num_workers=args.workers)
+    validloader = loader.DataLoader(validset, batch_size=args.batch_size, shuffle=False, num_workers=args.workers)
 
     model = models.resnet152(pretrained=True)
     model.fc = nn.Linear(in_features=model.fc.in_features, out_features=2)
@@ -56,7 +56,6 @@ def main(args):
         best_score = min(score, best_score)
 
         utils.save_checkpoint(model, is_best, '.save/model.pth')
-
 
     writer.close()
 
