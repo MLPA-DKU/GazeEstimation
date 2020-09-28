@@ -1,3 +1,4 @@
+from PIL import Image
 import torch
 import torch.nn as nn
 import torch.utils.data as loader
@@ -40,45 +41,73 @@ def main():
         name = k[7:]
         new_state_dict[name] = v
     model.load_state_dict(new_state_dict)
-
     model.to(device)
+    model.eval()
+
     visualize_layer1 = viz.GradCam(model=model, feature_module=model.layer1, target_layer_names=['2'])
     visualize_layer2 = viz.GradCam(model=model, feature_module=model.layer2, target_layer_names=['2'])
     visualize_layer3 = viz.GradCam(model=model, feature_module=model.layer3, target_layer_names=['2'])
     visualize_layer4 = viz.GradCam(model=model, feature_module=model.layer4, target_layer_names=['2'])
 
-    evaluator = mm.AngleAccuracy()
+    # evaluator = mm.AngleAccuracy()
 
-    for _, batch in enumerate(validloader):
-        face, _, gaze = batch
-        face, gaze = face.to(device), gaze.to(device)
+    # for _, batch in enumerate(validloader):
+    #     face, _, gaze = batch
+    #     face, gaze = face.to(device), gaze.to(device)
+    # 
+    #     outputs = model(face)
+    #     activation_maps_layer1_th = visualize_layer1(face, index=0)
+    #     activation_maps_layer1_pi = visualize_layer1(face, index=1)
+    #     activation_maps_layer2_th = visualize_layer2(face, index=0)
+    #     activation_maps_layer2_pi = visualize_layer2(face, index=1)
+    #     activation_maps_layer3_th = visualize_layer3(face, index=0)
+    #     activation_maps_layer3_pi = visualize_layer3(face, index=1)
+    #     activation_maps_layer4_th = visualize_layer4(face, index=0)
+    #     activation_maps_layer4_pi = visualize_layer4(face, index=1)
+    # 
+    #     for i in range(1):
+    #         accuracy = evaluator(outputs[i].unsqueeze(0), gaze[i].unsqueeze(0))
+    #         print(f'accuracy of image {i}: {accuracy.item():.3f}')
+    # 
+    #     for i in range(1):
+    #         image = transforms.ToPILImage()(undo_normalize(face[i]).cpu())
+    #         helpers.view(image)
+    #         viz.view_activation_map(image, activation_maps_layer1_th[i].detach().cpu().numpy())
+    #         viz.view_activation_map(image, activation_maps_layer2_th[i].detach().cpu().numpy())
+    #         viz.view_activation_map(image, activation_maps_layer3_th[i].detach().cpu().numpy())
+    #         viz.view_activation_map(image, activation_maps_layer4_th[i].detach().cpu().numpy())
+    #         viz.view_activation_map(image, activation_maps_layer1_pi[i].detach().cpu().numpy())
+    #         viz.view_activation_map(image, activation_maps_layer2_pi[i].detach().cpu().numpy())
+    #         viz.view_activation_map(image, activation_maps_layer3_pi[i].detach().cpu().numpy())
+    #         viz.view_activation_map(image, activation_maps_layer4_pi[i].detach().cpu().numpy())
+    # 
+    #     break
 
-        outputs = model(face)
-        activation_maps_layer1_th = visualize_layer1(face, index=0)
-        activation_maps_layer1_pi = visualize_layer1(face, index=1)
-        activation_maps_layer2_th = visualize_layer2(face, index=0)
-        activation_maps_layer2_pi = visualize_layer2(face, index=1)
-        activation_maps_layer3_th = visualize_layer3(face, index=0)
-        activation_maps_layer3_pi = visualize_layer3(face, index=1)
-        activation_maps_layer4_th = visualize_layer4(face, index=0)
-        activation_maps_layer4_pi = visualize_layer4(face, index=1)
+    sample = Image.open('models/example.jpg').convert('RGB')
+    transformed_sample = transform(sample).unsqueeze(0).to(device)
 
-        for i in range(1):
-            accuracy = evaluator(outputs[i].unsqueeze(0), gaze[i].unsqueeze(0))
-            print(f'accuracy of image {i}: {accuracy.item():.3f}')
+    activation_maps_layer1_th = visualize_layer1(transformed_sample, index=0)
+    activation_maps_layer1_pi = visualize_layer1(transformed_sample, index=1)
+    activation_maps_layer2_th = visualize_layer2(transformed_sample, index=0)
+    activation_maps_layer2_pi = visualize_layer2(transformed_sample, index=1)
+    activation_maps_layer3_th = visualize_layer3(transformed_sample, index=0)
+    activation_maps_layer3_pi = visualize_layer3(transformed_sample, index=1)
+    activation_maps_layer4_th = visualize_layer4(transformed_sample, index=0)
+    activation_maps_layer4_pi = visualize_layer4(transformed_sample, index=1)
 
-        for i in range(1):
-            image = transforms.ToPILImage()(undo_normalize(face[i]).cpu())
-            helpers.view(image)
-            viz.view_activation_map(image, activation_maps_layer1_th[i].detach().cpu().numpy())
-            viz.view_activation_map(image, activation_maps_layer2_th[i].detach().cpu().numpy())
-            viz.view_activation_map(image, activation_maps_layer3_th[i].detach().cpu().numpy())
-            viz.view_activation_map(image, activation_maps_layer4_th[i].detach().cpu().numpy())
-            viz.view_activation_map(image, activation_maps_layer1_pi[i].detach().cpu().numpy())
-            viz.view_activation_map(image, activation_maps_layer2_pi[i].detach().cpu().numpy())
-            viz.view_activation_map(image, activation_maps_layer3_pi[i].detach().cpu().numpy())
-            viz.view_activation_map(image, activation_maps_layer4_pi[i].detach().cpu().numpy())
-            break
+    helpers.view(sample)
+    viz.view_activation_map(sample, activation_maps_layer1_th[0].detach().cpu().numpy())
+    viz.view_activation_map(sample, activation_maps_layer2_th[0].detach().cpu().numpy())
+    viz.view_activation_map(sample, activation_maps_layer3_th[0].detach().cpu().numpy())
+    viz.view_activation_map(sample, activation_maps_layer4_th[0].detach().cpu().numpy())
+    viz.view_activation_map(sample, activation_maps_layer1_pi[0].detach().cpu().numpy())
+    viz.view_activation_map(sample, activation_maps_layer2_pi[0].detach().cpu().numpy())
+    viz.view_activation_map(sample, activation_maps_layer3_pi[0].detach().cpu().numpy())
+    viz.view_activation_map(sample, activation_maps_layer4_pi[0].detach().cpu().numpy())
+
+def get_visualized_activation_map(model, image, visualizer, device=None):
+    model.eval()
+    model.to(device)
 
 
 if __name__ == '__main__':
