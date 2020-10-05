@@ -1,12 +1,12 @@
 from PIL import Image
 import torch
 import torch.nn as nn
-import torch.utils.data as loader
+# import torch.utils.data as loader
 import torchvision.models as models
 import torchvision.transforms as transforms
 
-import datasets.rtgene as rtgene
-import modules.modules as mm
+# import datasets.rtgene as rtgene
+# import modules.modules as mm
 import utils.visualization.cam as viz
 import utils.helpers as helpers
 from collections import OrderedDict
@@ -25,12 +25,12 @@ def main():
         transforms.ToTensor(),
         transforms.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))
     ])
-    undo_normalize = helpers.UnNormalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))
+    # undo_normalize = helpers.UnNormalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))
 
-    data_type = ['face']
+    # data_type = ['face']
 
-    validset = rtgene.RTGENE(root='/mnt/datasets/RT-GENE', transform=transform, subjects=validlist, data_type=data_type)
-    validloader = loader.DataLoader(validset, batch_size=1, shuffle=True)
+    # validset = rtgene.RTGENE(root='/mnt/datasets/RT-GENE', transform=transform, subjects=validlist, data_type=data_type)
+    # validloader = loader.DataLoader(validset, batch_size=1, shuffle=True)
 
     model = models.resnet152()
     model.fc = nn.Linear(in_features=model.fc.in_features, out_features=2)
@@ -104,10 +104,6 @@ def main():
     viz.view_activation_map(sample, activation_maps_layer2_pi[0].detach().cpu().numpy())
     viz.view_activation_map(sample, activation_maps_layer3_pi[0].detach().cpu().numpy())
     viz.view_activation_map(sample, activation_maps_layer4_pi[0].detach().cpu().numpy())
-
-def get_visualized_activation_map(model, image, visualizer, device=None):
-    model.eval()
-    model.to(device)
 
 
 if __name__ == '__main__':
