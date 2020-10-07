@@ -96,7 +96,7 @@ class GradCam:
         return torch.stack(ret)
 
 
-def view_activation_map(image, mask, filename='visualized_activation_map.png'):
+def view_activation_map(image, mask):
     image = np.array(image, dtype=np.float32) / 255
     heatmap = plt.get_cmap('jet')(mask)[:, :, :3].astype(np.float32)
 
@@ -106,42 +106,13 @@ def view_activation_map(image, mask, filename='visualized_activation_map.png'):
     plt.axis('off')
     plt.show()
 
+
+def save_activation_map(image, mask, filename='visualized_activation_map.png'):
+    image = np.array(image, dtype=np.float32) / 255
+    heatmap = plt.get_cmap('jet')(mask)[:, :, :3].astype(np.float32)
+
+    visualize = heatmap + image
+    visualize = visualize / np.max(visualize)
     visualize = visualize * 255
     visualize = Image.fromarray(visualize.astype(np.uint8))
     visualize.save(filename)
-
-
-if __name__ == '__main__':
-
-    import time
-    import torchvision.models as models
-    import torchvision.transforms as transforms
-
-    device = 'cuda:0'
-
-    transform = transforms.Compose([
-        transforms.ToTensor(),
-        transforms.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))
-    ])
-
-    model = models.resnet18(pretrained=True)
-    model.fc = nn.Linear(in_features=model.fc.in_features, out_features=2)
-    model.to(device)
-    visualizer = GradCam(model=model, feature_module=model.layer4, target_layer_names=["1"])
-
-    image = Image.open('example.jpg').convert('RGB').resize((224, 224))
-    transformed_image = transform(image).unsqueeze(0)
-    for _ in range(2):
-        transformed_image = torch.cat([transformed_image, transformed_image], dim=0)
-    transformed_image = transformed_image.to(device)
-
-    # if target_index = None, returns the map for the highest scoring category.
-    # otherwise, targets requires index.
-    target_index = None
-    t1 = time.time()
-    mask_list = visualizer(transformed_image, target_index)
-    t2 = time.time()
-    print(f'{t2 - t1:.3f} s')
-
-    for i in range(4):
-        view_activation_map(image, mask_list[i].detach().cpu().numpy())

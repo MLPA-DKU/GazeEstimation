@@ -10,7 +10,7 @@ import torchvision.models as models
 import torchvision.transforms as transforms
 
 import datasets.rtgene as rtgene
-import modules.modules as mm
+import modules.metrics as mm
 import utils.helpers as utils
 
 trainlist = ['s001', 's002', 's003', 's004', 's005', 's006', 's007', 's008', 's009', 's010', 's011', 's012', 's013']
@@ -43,10 +43,11 @@ def main(args):
     optimizer = optim.Adam(model.parameters(), lr=0.01, betas=(0.9, 0.95))
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, cooldown=10)
 
-    writer = tensorboard.SummaryWriter(os.path.join(args.logs, 'rt-gene-resnet152'))
+    writer = tensorboard.SummaryWriter(os.path.join(args.logs, 'viz-test-resnet18'))
 
     for epoch in range(args.epochs):
         args.epoch = epoch
+        args.use_cuda = True if args.device.startswith('cuda') else False
         train(trainloader, model, criterion, evaluator, optimizer, writer, args)
         score = validate(validloader, model, criterion, evaluator, writer, args)
         scheduler.step(score)
