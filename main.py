@@ -14,8 +14,8 @@ import modules.modules as mm
 import utils.helpers as utils
 
 trainlist = ['s001', 's002', 's003', 's004', 's005', 's006', 's007', 's008', 's009', 's010', 's011', 's012', 's013']
-validlist = ['s014', 's015', 's016']
-inferlist = ['s000']
+validlist = ['s014', 's015']
+inferlist = ['s016']
 
 
 def main(args):
@@ -34,9 +34,9 @@ def main(args):
     trainloader = loader.DataLoader(trainset, batch_size=args.batch_size, shuffle=True, num_workers=args.workers)
     validloader = loader.DataLoader(validset, batch_size=args.batch_size, shuffle=False, num_workers=args.workers)
 
-    model = models.resnet152(pretrained=True)
+    model = models.resnet18(pretrained=True)
     model.fc = nn.Linear(in_features=model.fc.in_features, out_features=2)
-    model = nn.DataParallel(model).to(args.device)
+    model.to(args.device)
 
     criterion = nn.MSELoss()
     evaluator = mm.AngleAccuracy()
