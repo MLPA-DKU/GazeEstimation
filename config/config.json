@@ -1,0 +1,35 @@
+{
+  "dataset": {
+    "type": "RTGENE",
+    "args": {
+      "trainlist": ["s001", "s002", "s003", "s004", "s005", "s006", "s007", "s008", "s009", "s010", "s011", "s012", "s013"],
+      "validlist": ["s014", "s015"],
+      "inferlist": ["s016"],
+      "root": "/mnt/datasets/RT-GENE",
+      "data_type": ["face"]
+    }
+  },
+  "loader": {
+    "type": "DataLoader",
+    "args": {
+      "batch_size": 16,
+      "workers": 8
+    }
+  },
+  "optimizer": {
+    "type": "Adam",
+    "args": {
+      "lr": 0.01,
+      "betas": [0.9, 0.95]
+    }
+  },
+  "settings": {
+    "type": "GazeEstimation",
+    "args": {
+      "logs": "/mnt/results/logs",
+      "save": "model.pth",
+      "device": "cuda:0",
+      "epochs": 1000
+    }
+  }
+}

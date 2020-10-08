@@ -15,7 +15,7 @@ def main():
     sample = Image.open('example.jpg').convert('RGB').resize((224, 224))
     transformed_sample = transform(sample).unsqueeze(0)
 
-    model = torch.load('/tmp/pycharm_project_662/model_best.pth.tar', map_location='cpu')
+    model = torch.load('/tmp/pycharm_project_662/resnet18.pth', map_location='cpu')
     model.eval()
 
     model_weights = []
@@ -55,11 +55,16 @@ def main():
     outputs = results
 
     for num_layer in range(len(outputs)):
+        plt.figure(figsize=(30, 30))
         print(f'loading layer {num_layer:2d} feature maps...')
         layer_viz = outputs[num_layer][0, :, :, :]
-        features = torch.mean(torch.stack([f for f in layer_viz.data]), dim=0)
-        plt.imshow(features, cmap='jet')
-        plt.axis('off')
+        layer_viz = layer_viz.data
+        for i, feature in enumerate(layer_viz):
+            if i == 64:
+                break
+            plt.subplot(8, 8, i + 1)
+            plt.imshow(feature, cmap='jet')
+            plt.axis('off')
         plt.show()
 
 

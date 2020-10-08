@@ -15,11 +15,11 @@ def main():
         transforms.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))
     ])
 
-    model = torch.load('model.pth')
+    model = torch.load('resnet50.pth')
     model.to(device)
     model.eval()
 
-    visualize_layer4 = viz.GradCam(model=model, feature_module=model.layer4, target_layer_names=['1'])
+    visualize_layer4 = viz.GradCam(model=model, feature_module=model.layer4, target_layer_names=['2'])
 
     sample = Image.open('models/example.jpg').convert('RGB')
     transformed_sample = transform(sample).unsqueeze(0).to(device)
