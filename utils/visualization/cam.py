@@ -19,7 +19,7 @@ class FeatureExtractor:
     def __call__(self, x):
         outputs = []
         self.gradients = []
-        for name, module in self.model._modules.items():
+        for name, module in dict(self.model.named_children()).items():
             x = module(x)
             if name in self.target_layers:
                 x.register_hook(self.save_gradient)
@@ -39,7 +39,7 @@ class ModelFeatureExtractor:
 
     def __call__(self, x):
         target_activations = []
-        for name, module in self.model._modules.items():
+        for name, module in dict(self.model.named_children()).items():
             if module == self.feature_module:
                 target_activations, x = self.feature_extractor(x)
             elif "avgpool" in name.lower():
@@ -47,7 +47,6 @@ class ModelFeatureExtractor:
                 x = x.view(x.size(0),-1)
             else:
                 x = module(x)
-
         return target_activations, x
 
 

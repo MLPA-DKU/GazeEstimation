@@ -3,7 +3,6 @@ import torch
 import torchvision.transforms as transforms
 
 import utils.visualization.cam as viz
-import utils.helpers as helpers
 
 
 def main():
@@ -30,7 +29,6 @@ def main():
     mask = mask - torch.min(mask)
     mask = mask / torch.max(mask)
 
-    helpers.view(sample)
     viz.view_activation_map(sample, mask.squeeze(0).detach().cpu().numpy())
 
 

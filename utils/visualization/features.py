@@ -38,15 +38,15 @@ def main():
                         conv_layers.append(child)
     print(f'total convolutional layers: {counter}')
 
-    # for weight, conv in zip(model_weights, conv_layers):
-    #     print(f'CONV: {conv} ==> SHAPE: {weight.shape}')
+    for weight, conv in zip(model_weights, conv_layers):
+        print(f'CONV: {conv} ==> SHAPE: {weight.shape}')
 
-    # plt.figure(figsize=(20, 17))
-    # for i, filter in enumerate(model_weights[0]):
-    #     plt.subplot(8, 8, i + 1)
-    #     plt.imshow(filter[0, :, :].detach(), cmap='jet')
-    #     plt.axis('off')
-    # plt.show()
+    plt.figure(figsize=(20, 17))
+    for i, filter in enumerate(model_weights[0]):
+        plt.subplot(8, 8, i + 1)
+        plt.imshow(filter[0, :, :].detach(), cmap='jet')
+        plt.axis('off')
+    plt.show()
 
     results = [conv_layers[0](transformed_sample)]
     for i in range(1, len(conv_layers)):

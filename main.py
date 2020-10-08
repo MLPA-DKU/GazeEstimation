@@ -1,9 +1,7 @@
-import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.utils.data as loader
-import torch.utils.tensorboard as tensorboard
 import torchvision.models as models
 import torchvision.transforms as transforms
 
@@ -33,19 +31,14 @@ def main(args):
     optimizer = args.initialize_object('optimizer', optim, model.parameters())
     scheduler = args.initialize_object('scheduler', optim.lr_scheduler, optimizer)
 
-    writer = args.initialize_object('writer', tensorboard)
-
     for epoch in range(args.epochs):
         args.epoch = epoch
-        train(trainloader, model, criterion, evaluator, optimizer, writer, args)
-        score = validate(validloader, model, criterion, evaluator, writer, args)
-        scheduler.step(score)
-        writer.add_scalar('learning rate', optimizer.param_groups[0]['lr'], epoch)
-
-    writer.close()
+        train(trainloader, model, criterion, evaluator, optimizer, args)
+        validate(validloader, model, criterion, evaluator, args)
+        scheduler.step()
 
 
-def train(dataloader, model, criterion, evaluator, optimizer, writer, args):
+def train(dataloader, model, criterion, evaluator, optimizer, args):
     model.train()
     for i, batch in enumerate(dataloader):
         face, _, gaze = batch
@@ -59,16 +52,11 @@ def train(dataloader, model, criterion, evaluator, optimizer, writer, args):
         loss.backward()
         optimizer.step()
 
-        if writer is not None:
-            writer.add_scalar('training loss', loss.item(), args.epoch * len(dataloader) + i)
-            writer.add_scalar('training score', score.item(), args.epoch * len(dataloader) + i)
-
         print(f'Epoch[{args.epoch + 1:4d}/{args.epochs:4d}] - batch[{i + 1:4d}/{len(dataloader):4d}]'
               f' - loss: {loss.item():7.3f} - accuracy: {score.item():7.3f}')
 
 
-def validate(dataloader, model, criterion, evaluator, writer, args):
-    res = []
+def validate(dataloader, model, criterion, evaluator, args):
     model.eval()
     with torch.no_grad():
         for i, batch in enumerate(dataloader):
@@ -79,17 +67,8 @@ def validate(dataloader, model, criterion, evaluator, writer, args):
             loss = criterion(outputs, gaze)
             score = evaluator(outputs, gaze)
 
-            res.append(loss.item())
-            res.append(score.item())
-
-            if writer is not None:
-                writer.add_scalar('validation loss', loss.item(), args.epoch * len(dataloader) + i)
-                writer.add_scalar('validation score', score.item(), args.epoch * len(dataloader) + i)
-
             print(f'Epoch[{args.epoch + 1:4d}/{args.epochs:4d}] - batch[{i + 1:4d}/{len(dataloader):4d}]'
                   f' - loss: {loss.item():7.3f} - accuracy: {score.item():7.3f}')
-
-    return np.nanmean(res)
 
 
 if __name__ == '__main__':
