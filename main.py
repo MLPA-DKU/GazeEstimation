@@ -47,7 +47,6 @@ def main(args):
 
     for epoch in range(args.epochs):
         args.epoch = epoch
-        args.use_cuda = True if args.device.startswith('cuda') else False
         train(trainloader, model, criterion, evaluator, optimizer, writer, args)
         score = validate(validloader, model, criterion, evaluator, writer, args)
         scheduler.step(score)
@@ -55,8 +54,7 @@ def main(args):
 
         is_best = score < best_score
         best_score = min(score, best_score)
-
-        utils.save_checkpoint(model, is_best, 'model.pth')
+        utils.save_checkpoint(model, is_best, 'resnet18.pth')
 
     writer.close()
 

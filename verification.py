@@ -15,7 +15,7 @@ def main():
         transforms.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))
     ])
 
-    model = torch.load('model_best.pth.tar')
+    model = torch.load('model.pth')
     model.to(device)
     model.eval()
 
