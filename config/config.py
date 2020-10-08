@@ -57,11 +57,20 @@ class ConfigParser(_Dict):
     def __init__(self, filename):
         self.filename = os.path.abspath(filename)
         super(ConfigParser, self).__init__(self.read_configs())
+        self.print_json(self)
 
     def read_configs(self):
         with open(self.filename) as f:
             configs = json.load(f)
         return configs
+
+    def print_json(self, _dict, indent=''):
+        for k, v in _dict.items():
+            if isinstance(_dict[k], _Dict):
+                print(indent+f'{k}:')
+                self.print_json(v, indent+'    ')
+            else:
+                print(indent+f'{k}: {v}')
 
     def initialize_object(self, name, module, *args, **kwargs):
         module_name = self[name]['type']
@@ -69,12 +78,3 @@ class ConfigParser(_Dict):
         assert all([k not in module_name for k in kwargs])
         module_args.update(kwargs)
         return getattr(module, module_name)(*args, **module_args)
-
-
-def print_json(config, indent=''):
-    for k, v in config.items():
-        if type(config[k]) is _Dict:
-            print(indent+f'{k}:')
-            print_json(v, indent+'    ')
-        else:
-            print(indent+f'{k}: {v}')
