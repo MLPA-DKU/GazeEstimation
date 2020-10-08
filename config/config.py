@@ -16,7 +16,11 @@ class _Dict(dict):
                 if k == key:
                     return v
                 if isinstance(v, _Dict):
-                    return __proxy__(v, key)
+                    ret = __proxy__(v, key)
+                    if ret is not None:
+                        return ret
+                    else:
+                        continue
         try:
             return __proxy__(self, key)
         except KeyError as e:

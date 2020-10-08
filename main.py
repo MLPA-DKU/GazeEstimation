@@ -12,7 +12,7 @@ import torchvision.transforms as transforms
 import datasets
 import modules
 import config
-import utils.helpers as utils
+import utils
 
 
 def main(args):
