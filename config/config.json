@@ -1,29 +1,31 @@
 {
+  "meta": {
+    "trainlist": [
+      "s001",
+      "s002",
+      "s003",
+      "s004",
+      "s005",
+      "s006",
+      "s007",
+      "s008",
+      "s009",
+      "s010",
+      "s011",
+      "s012",
+      "s013"
+    ],
+    "validlist": [
+      "s014",
+      "s015"
+    ],
+    "inferlist": [
+      "s016"
+    ]
+  },
   "dataset": {
     "type": "RTGENE",
     "args": {
-      "trainlist": [
-        "s001",
-        "s002",
-        "s003",
-        "s004",
-        "s005",
-        "s006",
-        "s007",
-        "s008",
-        "s009",
-        "s010",
-        "s011",
-        "s012",
-        "s013"
-      ],
-      "validlist": [
-        "s014",
-        "s015"
-      ],
-      "inferlist": [
-        "s016"
-      ],
       "root": "/mnt/datasets/RT-GENE",
       "data_type": [
         "face"
@@ -34,8 +36,22 @@
     "type": "DataLoader",
     "args": {
       "batch_size": 16,
-      "workers": 8
+      "num_workers": 8
     }
+  },
+  "model": {
+    "type": "resnet50",
+    "args": {
+      "pretrained": true
+    }
+  },
+  "criterion": {
+    "type": "MSELoss",
+    "args": {}
+  },
+  "evaluator": {
+    "type": "AngleError",
+    "args": {}
   },
   "optimizer": {
     "type": "Adam",
@@ -47,10 +63,22 @@
       ]
     }
   },
+  "scheduler": {
+    "type": "ReduceLROnPlateau",
+    "args": {
+      "factor": 0.1,
+      "cooldown": 3
+    }
+  },
+  "writer": {
+    "type": "SummaryWriter",
+    "args": {
+      "log_dir": "/mnt/results/logs/temp1"
+    }
+  },
   "settings": {
     "type": "GazeEstimation",
     "args": {
-      "logs": "/mnt/results/logs",
       "save": "model.pth",
       "device": "cuda:0",
       "epochs": 1000
