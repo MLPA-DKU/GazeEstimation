@@ -26,7 +26,7 @@
     "args": {}
   },
   "evaluator": {
-    "type": "AngleError",
+    "type": "AngleErrorGaze360",
     "args": {}
   },
   "optimizer": {

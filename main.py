@@ -1,8 +1,7 @@
+import numpy as np
 import torch
-import torch.nn as nn
 import torch.optim as optim
 import torch.utils.data as loader
-# import torchvision.models as models
 import torchvision.transforms as transforms
 
 import config
@@ -34,8 +33,8 @@ def main(args):
     for epoch in range(args.epochs):
         args.epoch = epoch
         train(trainloader, model, criterion, evaluator, optimizer, args)
-        validate(validloader, model, criterion, evaluator, args)
-        scheduler.step()
+        score = validate(validloader, model, criterion, evaluator, args)
+        scheduler.step(score)
 
 
 def train(dataloader, model, criterion, evaluator, optimizer, args):
@@ -56,6 +55,7 @@ def train(dataloader, model, criterion, evaluator, optimizer, args):
 
 
 def validate(dataloader, model, criterion, evaluator, args):
+    res = []
     model.eval()
     with torch.no_grad():
         for i, (data, targets) in enumerate(dataloader):
@@ -65,8 +65,11 @@ def validate(dataloader, model, criterion, evaluator, args):
             loss = criterion(outputs, targets, var)
             score = evaluator(outputs, targets)
 
+            res.append(loss.item())
+
             print(f'Epoch[{args.epoch + 1:4d}/{args.epochs:4d}] - batch[{i + 1:4d}/{len(dataloader):4d}]'
                   f' - loss: {loss.item():7.3f} - accuracy: {score.item():7.3f}')
+    return np.nanmean(res)
 
 
 if __name__ == '__main__':
