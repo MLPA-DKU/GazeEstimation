@@ -11,9 +11,9 @@ from torchvision.datasets import VisionDataset
 class Gaze360(VisionDataset):
 
     base_folder = 'imgs'
-    train_list = list(open('train.txt', 'r'))
-    valid_list = list(open('validation.txt', 'r'))
-    infer_list = list(open('test.txt', 'r'))
+    train_list = list(open('datasets/gaze360/train.txt', 'r'))
+    valid_list = list(open('datasets/gaze360/validation.txt', 'r'))
+    infer_list = list(open('datasets/gaze360/test.txt', 'r'))
 
     def __init__(self, root, train=True, transform=None, target_transform=None, mode=None):
         super(Gaze360, self).__init__(root, transform=transform, target_transform=target_transform)
@@ -50,8 +50,7 @@ class Gaze360(VisionDataset):
         # doing this so that it is consistent with all other datasets
         # to return a PIL Image
         data = [Image.open(p).convert('RGB').resize((224, 224)) for p in data]
-        if self.mode is not 'video':
-            data = data[3]
+        data = data if self.mode == 'video' else data[3]
 
         target = torch.tensor(target, dtype=torch.float32)
         target = nn.functional.normalize(target.view(1, 3)).view(3)
@@ -59,12 +58,12 @@ class Gaze360(VisionDataset):
         target = torch.stack(target)
 
         if self.transform is not None:
-            data = torch.stack([self.transform(f) for f in data]) if self.mode is 'video' else transform(data)
+            data = torch.stack([self.transform(f) for f in data]) if self.mode == 'video' else self.transform(data)
 
         if self.target_transform is not None:
             target = self.target_transform(target)
 
-        data = torch.cat([f for f in data], dim=0) if self.mode is 'video' else data
+        data = torch.cat([f for f in data], dim=0) if self.mode == 'video' else data
 
         return data, target
 

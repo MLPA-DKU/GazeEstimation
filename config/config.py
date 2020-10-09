@@ -9,7 +9,7 @@ class ConfigParser(utils.Container):
     def __init__(self, filename):
         self.filename = os.path.abspath(filename)
         super(ConfigParser, self).__init__(self.read_configs())
-        self.print_configs(self)
+        # self.print_configs(self)
 
     def read_configs(self):
         with open(self.filename) as f:
@@ -18,7 +18,7 @@ class ConfigParser(utils.Container):
 
     def print_configs(self, _dict, indent=''):
         for k, v in _dict.items():
-            if isinstance(_dict[k], _Dict):
+            if isinstance(_dict[k], utils.Container):
                 print(indent+f'{k}:')
                 self.print_json(v, indent+'    ')
             else:

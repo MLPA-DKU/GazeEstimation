@@ -1,0 +1,59 @@
+{
+  "meta": {},
+  "dataset": {
+    "type": "Gaze360",
+    "args": {
+      "root": "/mnt/datasets/Gaze360",
+      "mode": "video"
+    }
+  },
+  "loader": {
+    "type": "DataLoader",
+    "args": {
+      "batch_size": 32,
+      "num_workers": 8
+    }
+  },
+  "model": {
+    "type": "GazeLSTM",
+    "args": {
+      "backbone": "resnet18",
+      "pretrained": true
+    }
+  },
+  "criterion": {
+    "type": "PinBallLoss",
+    "args": {}
+  },
+  "evaluator": {
+    "type": "AngleError",
+    "args": {}
+  },
+  "optimizer": {
+    "type": "Adam",
+    "args": {
+      "lr": 1e-4
+    }
+  },
+  "scheduler": {
+    "type": "ReduceLROnPlateau",
+    "args": {
+      "factor": 0.1,
+      "cooldown": 3
+    }
+  },
+  "writer": {
+    "type": "SummaryWriter",
+    "args": {
+      "log_dir": "/mnt/results/logs/temp1"
+    }
+  },
+  "settings": {
+    "type": "GazeEstimation",
+    "args": {
+      "save": "model.pth",
+      "device": "cuda:0",
+      "epochs": 1000
+    }
+  }
+}
