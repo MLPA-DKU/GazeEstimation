@@ -60,7 +60,7 @@ def visualize_feature_maps(model, tensor, index=None, verbose=0):
     for i in range(1, len(conv_layers)):
         feature_maps.append(conv_layers[i](feature_maps[-1]))
 
-    index = [int(index)] if index is not None else [np.arange(len(feature_maps)).tolist()]
+    index = [int(index)] if index is not None else np.arange(len(feature_maps)).tolist()
     for num_layer in index:
         fig = plt.figure(figsize=(30, 30))
         if verbose > 0:

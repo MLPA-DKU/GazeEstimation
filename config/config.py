@@ -57,14 +57,14 @@ class ConfigParser(_Dict):
     def __init__(self, filename):
         self.filename = os.path.abspath(filename)
         super(ConfigParser, self).__init__(self.read_configs())
-        self.print_json(self)
+        self.print_configs(self)
 
     def read_configs(self):
         with open(self.filename) as f:
             configs = json.load(f)
         return configs
 
-    def print_json(self, _dict, indent=''):
+    def print_configs(self, _dict, indent=''):
         for k, v in _dict.items():
             if isinstance(_dict[k], _Dict):
                 print(indent+f'{k}:')

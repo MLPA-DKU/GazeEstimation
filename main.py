@@ -41,7 +41,7 @@ def main(args):
 def train(dataloader, model, criterion, evaluator, optimizer, args):
     model.train()
     for i, batch in enumerate(dataloader):
-        face, _, gaze = batch
+        face, gaze = batch
         face, gaze = face.to(args.device), gaze.to(args.device)
 
         outputs = model(face)
@@ -60,7 +60,7 @@ def validate(dataloader, model, criterion, evaluator, args):
     model.eval()
     with torch.no_grad():
         for i, batch in enumerate(dataloader):
-            face, _, gaze = batch
+            face, gaze = batch
             face, gaze = face.to(args.device), gaze.to(args.device)
 
             outputs = model(face)

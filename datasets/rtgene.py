@@ -14,7 +14,7 @@ class RTGENE(VisionDataset):
         self.headpose = []
         self.target = []
 
-        self.data_type = ['head', 'face', 'left', 'right'] if data_type is None else data_type
+        self.data_type = ['head', 'face', 'left', 'right', 'headpose'] if data_type is None else data_type
 
         for subject in subjects:
             subject_folder = os.path.join(self.root, f'{subject}_glasses')
@@ -59,7 +59,7 @@ class RTGENE(VisionDataset):
 
         batch = []
         batch.extend(data)
-        batch.append(headpose)
+        batch.append(headpose) if 'headpose' in self.data_type else None
         batch.append(target)
 
         return batch
