@@ -1,30 +1,21 @@
+from functools import wraps
 
 
-class Callbacks:
+class Tracker(object):
 
-    def __init__(self, verbose):
-        self.verbose = verbose
-
-    def epoch_begin(self):
+    def __init__(self):
         pass
 
-    def epoch_end(self):
-        pass
+    def on(self, event_name, *args, **kwargs):
+        def decorator(func):
+            self.add_event_handler(event_name, func, *args, **kwargs)
+            return func
+        return decorator
 
-    def train_begin(self):
-        pass
+    def add_event_handler(self, event_name, handler, *args, **kwargs):
+        if isinstance(event_name, ...):
+            for e in event_name:
+                self.add_event_handler(e, handler, *args, **kwargs)
+            return ...
 
-    def train_end(self):
-        pass
-
-    def validation_begin(self):
-        pass
-
-    def validation_end(self):
-        pass
-
-    def inference_begin(self):
-        pass
-
-    def inference_end(self):
-        pass
+        return ...
