@@ -1,12 +1,14 @@
 import numpy as np
 import torch
+import torch.nn as nn
 import torch.optim as optim
 import torch.utils.data as loader
+import torchvision.models as models
 import torchvision.transforms as transforms
 
 import config
 import datasets
-import models
+#import models
 import modules
 
 
@@ -23,9 +25,10 @@ def main(args):
     validloader = args.initialize_object('loader', loader, validset, shuffle=False)
 
     model = args.initialize_object('model', models)
+    model.fc = nn.Linear(model.fc.in_features, out_features=2)
     model.to(args.device)
 
-    criterion = args.initialize_object('criterion', modules)
+    criterion = args.initialize_object('criterion', nn)
     evaluator = args.initialize_object('evaluator', modules)
     optimizer = args.initialize_object('optimizer', optim, model.parameters())
     scheduler = args.initialize_object('scheduler', optim.lr_scheduler, optimizer)
@@ -42,8 +45,8 @@ def train(dataloader, model, criterion, evaluator, optimizer, args):
     for i, (data, targets) in enumerate(dataloader):
         data, targets = data.to(args.device), targets.to(args.device)
 
-        outputs, var = model(data)
-        loss = criterion(outputs, targets, var)
+        outputs = model(data)
+        loss = criterion(outputs, targets)
         score = evaluator(outputs, targets)
 
         optimizer.zero_grad()
@@ -61,8 +64,8 @@ def validate(dataloader, model, criterion, evaluator, args):
         for i, (data, targets) in enumerate(dataloader):
             data, targets = data.to(args.device), targets.to(args.device)
 
-            outputs, var = model(data)
-            loss = criterion(outputs, targets, var)
+            outputs = model(data)
+            loss = criterion(outputs, targets)
             score = evaluator(outputs, targets)
 
             res.append(loss.item())

@@ -4,7 +4,7 @@
     "type": "Gaze360",
     "args": {
       "root": "/mnt/datasets/Gaze360",
-      "mode": "video"
+      "mode": "image"
     }
   },
   "loader": {
@@ -15,14 +15,13 @@
     }
   },
   "model": {
-    "type": "GazeLSTM",
+    "type": "resnet50",
     "args": {
-      "backbone": "resnet18",
       "pretrained": true
     }
   },
   "criterion": {
-    "type": "PinBallLoss",
+    "type": "MSELoss",
     "args": {}
   },
   "evaluator": {
