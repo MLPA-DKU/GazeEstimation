@@ -1,21 +1,14 @@
-from functools import wraps
+import random
+import torch
+import time
+import tqdm
 
+print(torch.cuda.is_available())
+print(False)
 
-class Tracker(object):
+pbar = tqdm.tqdm(range(100))
+pbar.set_description('TRAIN')
+pbar.set_postfix_str(f'loss: {random.random():.3f}')
 
-    def __init__(self):
-        pass
-
-    def on(self, event_name, *args, **kwargs):
-        def decorator(func):
-            self.add_event_handler(event_name, func, *args, **kwargs)
-            return func
-        return decorator
-
-    def add_event_handler(self, event_name, handler, *args, **kwargs):
-        if isinstance(event_name, ...):
-            for e in event_name:
-                self.add_event_handler(e, handler, *args, **kwargs)
-            return ...
-
-        return ...
+for i in pbar:
+    time.sleep(0.1)

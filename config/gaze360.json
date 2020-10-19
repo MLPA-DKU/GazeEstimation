@@ -51,7 +51,7 @@
     "type": "GazeEstimation",
     "args": {
       "save": "model.pth",
-      "device": "cuda:0",
+      "device": "cuda:1",
       "epochs": 1000
     }
   }
