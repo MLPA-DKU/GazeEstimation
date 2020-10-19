@@ -1,14 +1,17 @@
+import tqdm
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.utils.data as loader
+import torch.utils.tensorboard as tensorboard
 import torchvision.models as models
 import torchvision.transforms as transforms
 
 import config
 import datasets
 import modules
+import utils
 
 
 def main(args):
@@ -32,14 +35,22 @@ def main(args):
     optimizer = args.initialize_object('optimizer', optim, model.parameters())
     scheduler = args.initialize_object('scheduler', optim.lr_scheduler, optimizer)
 
+    writer = args.initialize_object('writer', tensorboard)
+    args.writer = writer
+
     for epoch in range(args.epochs):
         args.epoch = epoch
         train(trainloader, model, criterion, evaluator, optimizer, args)
         score = validate(validloader, model, criterion, evaluator, args)
         scheduler.step(score)
 
+    args.writer.close()
+
 
 def train(dataloader, model, criterion, evaluator, optimizer, args):
+    dataloader = tqdm.tqdm(dataloader)
+    res = utils.ResCapture(dataloader, args, 'train')
+
     model.train()
     for i, (data, targets) in enumerate(dataloader):
         data, targets = data.to(args.device), targets.to(args.device)
@@ -52,12 +63,14 @@ def train(dataloader, model, criterion, evaluator, optimizer, args):
         loss.backward()
         optimizer.step()
 
-        print(f'Epoch[{args.epoch + 1:4d}/{args.epochs:4d}] - batch[{i + 1:4d}/{len(dataloader):4d}]'
-              f' - loss: {loss.item():7.3f} - accuracy: {score.item():7.3f}')
+        args.idx = i
+        res(loss.item(), score.item())
 
 
 def validate(dataloader, model, criterion, evaluator, args):
-    res = []
+    dataloader = tqdm.tqdm(dataloader)
+    res = utils.ResCapture(dataloader, args, 'valid')
+
     model.eval()
     with torch.no_grad():
         for i, (data, targets) in enumerate(dataloader):
@@ -67,11 +80,9 @@ def validate(dataloader, model, criterion, evaluator, args):
             loss = criterion(outputs, targets)
             score = evaluator(outputs, targets)
 
-            res.append(loss.item())
-
-            print(f'Epoch[{args.epoch + 1:4d}/{args.epochs:4d}] - batch[{i + 1:4d}/{len(dataloader):4d}]'
-                  f' - loss: {loss.item():7.3f} - accuracy: {score.item():7.3f}')
-    return np.nanmean(res)
+            args.idx = i
+            res(loss.item(), score.item())
+    return np.nanmean(res.results()[0]) + np.nanmean(res.results()[1])
 
 
 if __name__ == '__main__':
