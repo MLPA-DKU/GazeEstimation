@@ -3,22 +3,20 @@
   "dataset": {
     "type": "Gaze360",
     "args": {
-      "root": "/mnt/datasets/Gaze360",
+      "root": "/workspace/datasets/Gaze360",
       "mode": "image"
     }
   },
   "loader": {
     "type": "DataLoader",
     "args": {
-      "batch_size": 32,
-      "num_workers": 8
+      "batch_size": 16,
+      "num_workers": 0
     }
   },
   "model": {
-    "type": "resnet50",
-    "args": {
-      "pretrained": true
-    }
+    "type": "EfficientDet",
+    "args": {}
   },
   "criterion": {
     "type": "MSELoss",
@@ -31,7 +29,7 @@
   "optimizer": {
     "type": "Adam",
     "args": {
-      "lr": 1e-4
+      "lr": 0.1
     }
   },
   "scheduler": {
@@ -44,14 +42,14 @@
   "writer": {
     "type": "SummaryWriter",
     "args": {
-      "log_dir": "/mnt/results/logs/temp1"
+      "log_dir": "/workspace/logs"
     }
   },
   "settings": {
-    "type": "GazeEstimation",
+    "type": "Gaze360-EfficientDet",
     "args": {
       "save": "model.pth",
-      "device": "cuda:1",
+      "device": "cuda:0",
       "epochs": 1000
     }
   }
