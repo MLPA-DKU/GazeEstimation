@@ -9,7 +9,6 @@ class ConfigParser(utils.Container):
     def __init__(self, filename):
         self.filename = os.path.abspath(filename)
         super(ConfigParser, self).__init__(self.read_configs())
-        # self.print_configs(self)
 
     def read_configs(self):
         with open(self.filename) as f:

@@ -3,7 +3,6 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.utils.data as loader
-import torchvision.transforms as transforms
 
 import config
 import datasets
@@ -13,14 +12,8 @@ import modules
 
 def main(args):
 
-    transform = transforms.Compose([
-        transforms.Resize(512),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))
-    ])
-
-    trainset = args.initialize_object('dataset', datasets, train=True, transform=transform)
-    validset = args.initialize_object('dataset', datasets, train=False, transform=transform)
+    trainset = args.initialize_object('dataset', datasets, train=True, transform=config.transform)
+    validset = args.initialize_object('dataset', datasets, train=False, transform=config.transform)
     trainloader = args.initialize_object('loader', loader, trainset, shuffle=True)
     validloader = args.initialize_object('loader', loader, validset, shuffle=False)
 
