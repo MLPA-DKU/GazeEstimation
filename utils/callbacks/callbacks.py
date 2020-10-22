@@ -1,3 +1,5 @@
+import numpy as np
+
 # from . import functional as F
 
 
@@ -12,15 +14,32 @@ class CheckPoint:
         self.verbose = verbose
 
 
-class EarlyStop:
+class EarlyStopping:
 
-    def __init__(self, monitor, delta=0, patience=0, baseline=None, mode='auto', verbose=0):
-        self.monitor = monitor
+    def __init__(self, delta=0, patience=0, verbose=0):
         self.delta = delta
         self.patience = patience
-        self.baseline = baseline
-        self.mode = mode
         self.verbose = verbose
+
+        self.counter = 0
+        self.monitor = np.Inf
+        self.early_stop = False
+        self.record_breaking = False
+        self.message = None
+
+    def __call__(self, monitor):
+        if monitor >= self.monitor - self.delta:
+            self.counter += 1
+            self.record_breaking = False
+            if self.counter >= self.patience:
+                self.early_stop = True
+        else:
+            self.monitor = min(self.monitor, monitor)
+            self.counter = 0
+            self.record_breaking = True
+
+        if self.verbose > 0:
+            self.message = f'ESC[{self.counter:{len(str(self.patience))}d}/{self.patience:}]'
 
 
 class TensorBoard:
@@ -30,3 +49,16 @@ class TensorBoard:
 
     def __call__(self, loss, score):
         pass
+
+
+if __name__ == '__main__':
+    callback = EarlyStopping(patience=3, verbose=1)
+
+    for i in range(10):
+        loss = 0.1
+        if i > 1:
+            loss = 0.01
+        callback(loss)
+        print(callback.message)
+        if callback.early_stop:
+            break
