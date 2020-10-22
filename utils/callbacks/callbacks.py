@@ -1,71 +1,31 @@
-import os
-import os.path
-import numpy as np
-
 from . import functional as F
 
 
-class CheckPoint:
+# (train) Epoch[0000/0000] 000.0% |________________________________________| 0000/0000, ETA: 00:00, Loss: 0.000, Metrics: 0.000
+class Glance:
 
-    def __init__(self, filepath, save_best_only=False, save_weights_only=False, verbose=0):
-        self.filepath = filepath
-        self.save_best_only = save_best_only
-        self.save_weights_only = save_weights_only
+    def __init__(self, sequence, epochs, batches, verbose=1, fmt=':.3f'):
+        self.sequence = sequence
+        self.epoch = 0
+        self.batch = 0
+        self.epochs = epochs
+        self.batches = batches
         self.verbose = verbose
+        self.fmt = fmt
 
-        self.message = None
+        self.batch_cache = None
+        self.batch_progress = None
+        self.batch_percents = None
+        self.batch_progress_bar = None
+        self.batch_terminated = False
 
-    def __call__(self, obj, is_best):
-        if self.save_weights_only:
-            for key in ['model', 'optimizer']:
-                if key in obj:
-                    module = obj[key]
-                    obj[key] = module.state_dict() if module is not None else None
+    def step(self):
+        self.batch += 1
+        self.batch_progress = self.batch / self.batches
+        self.batch_progress_bar = F.visualize_progress(self.batch_progress)
+        if self.batch == self.batches:
+            self.batch_terminated = True
 
-        if self.save_best_only:
-            self.filepath = os.path.join(os.path.dirname(self.filepath), 'model.pth.tar')
-            if is_best:
-                F.save_checkpoint(obj, self.filepath, is_best=False)
-                if self.verbose > 0:
-                    self.message = f'...saving checkpoint successfully'
-        else:
-            F.save_checkpoint(obj, self.filepath, is_best=is_best)
-            if self.verbose > 0:
-                self.message = f'...saving checkpoint successfully'
-
-
-class EarlyStopping:
-
-    def __init__(self, delta=0, patience=0, verbose=0):
-        self.delta = delta
-        self.patience = patience
-        self.verbose = verbose
-
-        self.counter = 0
-        self.monitor = np.Inf
-        self.early_stop = False
-        self.record_breaking = False
-        self.message = None
-
-    def __call__(self, monitor):
-        if monitor >= self.monitor - self.delta:
-            self.counter += 1
-            self.record_breaking = False
-            if self.counter >= self.patience:
-                self.early_stop = True
-        else:
-            self.monitor = min(self.monitor, monitor)
-            self.counter = 0
-            self.record_breaking = True
-
-        if self.verbose > 0:
-            self.message = f'ESC[{self.counter:{len(str(self.patience))}d}/{self.patience:}]'
-
-
-class TensorBoard:
-
-    def __init__(self, writer):
-        self.writer = writer
-
-    def __call__(self, loss, score):
-        pass
+    def step_epoch(self):
+        self.batch = 0
+        self.epoch += 1
