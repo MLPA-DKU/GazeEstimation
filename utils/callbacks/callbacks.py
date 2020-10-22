@@ -1,17 +1,37 @@
+import os
+import os.path
 import numpy as np
 
-# from . import functional as F
+from . import functional as F
 
 
 class CheckPoint:
 
-    def __init__(self, filepath, monitor, save_best_only=False, save_weights_only=False, mode='auto', verbose=0):
+    def __init__(self, filepath, save_best_only=False, save_weights_only=False, verbose=0):
         self.filepath = filepath
-        self.monitor = monitor
         self.save_best_only = save_best_only
         self.save_weights_only = save_weights_only
-        self.mode = mode
         self.verbose = verbose
+
+        self.message = None
+
+    def __call__(self, obj, is_best):
+        if self.save_weights_only:
+            for key in ['model', 'optimizer']:
+                if key in obj:
+                    module = obj[key]
+                    obj[key] = module.state_dict() if module is not None else None
+
+        if self.save_best_only:
+            self.filepath = os.path.join(os.path.dirname(self.filepath), 'model.pth.tar')
+            if is_best:
+                F.save_checkpoint(obj, self.filepath, is_best=False)
+                if self.verbose > 0:
+                    self.message = f'...saving checkpoint successfully'
+        else:
+            F.save_checkpoint(obj, self.filepath, is_best=is_best)
+            if self.verbose > 0:
+                self.message = f'...saving checkpoint successfully'
 
 
 class EarlyStopping:
@@ -49,16 +69,3 @@ class TensorBoard:
 
     def __call__(self, loss, score):
         pass
-
-
-if __name__ == '__main__':
-    callback = EarlyStopping(patience=3, verbose=1)
-
-    for i in range(10):
-        loss = 0.1
-        if i > 1:
-            loss = 0.01
-        callback(loss)
-        print(callback.message)
-        if callback.early_stop:
-            break

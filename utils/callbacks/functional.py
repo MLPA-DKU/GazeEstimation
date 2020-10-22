@@ -4,12 +4,12 @@ import shutil
 import torch
 
 
-def save_checkpoint(state, path, filename='model.pth', is_best=False, topnotch='best_model.pth'):
-    if not os.path.exists(path):
-        os.mkdir(path)
-    torch.save(state, os.path.join(path, filename))
+def save_checkpoint(state, filepath, is_best=False, topnotch='best_model.pth.tar'):
+    if not os.path.exists(os.path.dirname(filepath)):
+        os.mkdir(os.path.dirname(filepath))
+    torch.save(state, filepath)
     if is_best:
-        shutil.copyfile(os.path.join(path, filename), os.path.join(path, topnotch))
+        shutil.copyfile(filepath, os.path.join(os.path.dirname(filepath), topnotch))
 
 
 def visualize_progress(rate, length=40, symbol='█', whitespace=' '):
