@@ -1,4 +1,4 @@
 from .benchmark import *
-from .callbacks import *
+from .callback import *
 from .container import *
 from .visualization import *
