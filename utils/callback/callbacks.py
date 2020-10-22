@@ -4,7 +4,6 @@ import time
 from utils.callback import functional as F
 
 
-# (train) Epoch[0000/0000] 000.0% |________________________________________| 0000/0000, ETA: 00:00, Loss: 0.000, Metrics: 0.000
 class Glance:
 
     def __init__(self, epochs, batches):
