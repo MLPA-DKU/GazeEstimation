@@ -1,4 +1,3 @@
-import collections
 import os
 import os.path
 import numpy as np
@@ -62,16 +61,3 @@ class EarlyStopping:
         if self.verbose > 0:
             self.message = f'...early stopping count: {self.counter:>{len(str(self.patience))}d}' \
                            f' out of {self.patience:}'
-
-
-class Archive:
-
-    def __init__(self):
-        self.__dict__ = collections.defaultdict(list)
-
-    def __getitem__(self, key):
-        return self.__dict__[key]
-
-    def __call__(self, epoch, sequence, **kwargs):
-        for k, v in kwargs.items():
-            self.__dict__[f'epoch_{epoch}_{sequence}_{k}'].append(v)
