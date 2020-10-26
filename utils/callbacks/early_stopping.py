@@ -1,3 +1,5 @@
+import numpy as np
+
 
 class EarlyStopping:
 
@@ -24,5 +26,4 @@ class EarlyStopping:
             self.record_breaking = True
 
         if self.verbose > 0:
-            self.message = f'...early stopping count: {self.counter:>{len(str(self.patience))}d}' \
-                           f' out of {self.patience:}'
+            print(f'...early stopping count: {self.counter:>{len(str(self.patience))}d} out of {self.patience:}')
