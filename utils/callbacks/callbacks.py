@@ -1,7 +1,5 @@
 import time
 
-from . import functional as F
-
 
 class Glance:
 
@@ -47,7 +45,7 @@ class Glance:
             f'\r({self.sequence})',
             f'Epoch[{self.epoch:>{len(str(self.epochs))}d}/{self.epochs}]',
             f'{100 * self.batch_progress_rate:5.1f}%',
-            f'{F.visualize_progress(self.batch_progress_rate)}',
+            f'{visualize_progress(self.batch_progress_rate)}',
             f'{self.batch:>{len(str(self.batches))}d}/{self.batches}',
             f'ETA: {timestamp(int(self.elapsed))}<{timestamp(int(self.remains))} ::'
         ])
@@ -55,6 +53,10 @@ class Glance:
 
 def timestamp(seconds):
     return time.strftime('%H:%M:%S', time.gmtime(seconds))
+
+
+def visualize_progress(rate, length=40, symbol='█', whitespace=' '):
+    return f"|{symbol * int(length * rate) + whitespace * (length - int(length * rate))}|"
 
 
 if __name__ == '__main__':
