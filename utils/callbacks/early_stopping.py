@@ -26,4 +26,4 @@ class EarlyStopping:
             self.record_breaking = True
 
         if self.verbose > 0:
-            print(f'...early stopping count: {self.counter:>{len(str(self.patience))}d} out of {self.patience:}')
+            print(f'\n...early stopping count: {self.counter:>{len(str(self.patience))}d} out of {self.patience:}')

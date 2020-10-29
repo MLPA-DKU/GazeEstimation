@@ -22,7 +22,7 @@ class CheckPoint:
 
     def __call__(self, state, is_best):
         if self.verbose > 0:
-            print('preparing checkpoint to save...')
+            print('\npreparing checkpoint to save...')
 
         if self.save_weights_only:
             for k in ['model', 'optimizer']:
@@ -35,8 +35,8 @@ class CheckPoint:
             if is_best:
                 save_checkpoint(state, self.filepath, is_best=False)
                 if self.verbose > 0:
-                    print(f'...saving checkpoint at {self.filepath} successfully')
+                    print(f'\n...saving checkpoint at {self.filepath} successfully')
         else:
             save_checkpoint(state, self.filepath, is_best=is_best)
             if self.verbose > 0:
-                print(f'...saving checkpoint at {self.filepath} successfully')
+                print(f'\n...saving checkpoint at {self.filepath} successfully')
