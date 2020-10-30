@@ -4,14 +4,6 @@ import shutil
 import torch
 
 
-def save_checkpoint(state, filepath, is_best=False, topnotch='best_model.pth.tar'):
-    if not os.path.exists(os.path.dirname(filepath)):
-        os.mkdir(os.path.dirname(filepath))
-    torch.save(state, filepath)
-    if is_best:
-        shutil.copyfile(filepath, os.path.join(os.path.dirname(filepath), topnotch))
-
-
 class CheckPoint:
 
     def __init__(self, filepath, save_best_only=False, save_weights_only=False, verbose=0):
@@ -19,6 +11,9 @@ class CheckPoint:
         self.save_best_only = save_best_only
         self.save_weights_only = save_weights_only
         self.verbose = verbose
+
+        if not os.path.exists(os.path.dirname(self.filepath)):
+            os.mkdir(os.path.dirname(self.filepath))
 
     def __call__(self, state, is_best):
         if self.verbose > 0:
@@ -33,10 +28,15 @@ class CheckPoint:
         if self.save_best_only:
             self.filepath = os.path.join(os.path.dirname(self.filepath), 'model.pth.tar')
             if is_best:
-                save_checkpoint(state, self.filepath, is_best=False)
+                self.save_checkpoint(state, is_best=False)
                 if self.verbose > 0:
                     print(f'\n...saving checkpoint at {self.filepath} successfully')
         else:
-            save_checkpoint(state, self.filepath, is_best=is_best)
+            self.save_checkpoint(state, is_best=is_best)
             if self.verbose > 0:
                 print(f'\n...saving checkpoint at {self.filepath} successfully')
+
+    def save_checkpoint(self, state, is_best=False, topnotch='best_model.pth.tar'):
+        torch.save(state, self.filepath)
+        if is_best:
+            shutil.copyfile(self.filepath, os.path.join(os.path.dirname(self.filepath), topnotch))
