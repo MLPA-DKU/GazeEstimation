@@ -4,16 +4,16 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.utils.data as loader
 
-import config
 import datasets
 import models
 import modules
+import utils
 
 
 def main(args):
 
-    trainset = args.initialize_object('dataset', datasets, train=True, transform=config.transform)
-    validset = args.initialize_object('dataset', datasets, train=False, transform=config.transform)
+    trainset = args.initialize_object('dataset', datasets, train=True, transform=utils.transform)
+    validset = args.initialize_object('dataset', datasets, train=False, transform=utils.transform)
     trainloader = args.initialize_object('loader', loader, trainset, shuffle=True)
     validloader = args.initialize_object('loader', loader, validset, shuffle=False)
 
@@ -62,4 +62,4 @@ def validate(dataloader, model, criterion, evaluator, args):
 
 
 if __name__ == '__main__':
-    main(config.ConfigParser('config/gaze360.json'))
+    main(utils.ConfigParser('utils/config/gaze360.json'))

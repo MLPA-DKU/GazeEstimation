@@ -15,6 +15,9 @@ class CheckPoint:
         if not os.path.exists(os.path.dirname(self.filepath)):
             os.mkdir(os.path.dirname(self.filepath))
 
+        if self.save_best_only:
+            self.filepath = os.path.join(os.path.dirname(self.filepath), 'model_best.pth.tar')
+
     def __call__(self, state, is_best):
         if self.verbose > 0:
             print('\npreparing checkpoint to save...')
@@ -26,17 +29,12 @@ class CheckPoint:
                     state[k] = module.state_dict() if module is not None else None
 
         if self.save_best_only:
-            self.filepath = os.path.join(os.path.dirname(self.filepath), 'model.pth.tar')
             if is_best:
-                self.save_checkpoint(state, is_best=False)
-                if self.verbose > 0:
-                    print(f'\n...saving checkpoint at {self.filepath} successfully')
+                torch.save(state, self.filepath)
         else:
-            self.save_checkpoint(state, is_best=is_best)
-            if self.verbose > 0:
-                print(f'\n...saving checkpoint at {self.filepath} successfully')
+            torch.save(state, self.filepath)
+            if is_best:
+                shutil.copyfile(self.filepath, os.path.join(os.path.dirname(self.filepath), 'model_best.pth.tar'))
 
-    def save_checkpoint(self, state, is_best=False, topnotch='best_model.pth.tar'):
-        torch.save(state, self.filepath)
-        if is_best:
-            shutil.copyfile(self.filepath, os.path.join(os.path.dirname(self.filepath), topnotch))
+        if self.verbose > 0:
+            print(f'\n...saving checkpoint at {self.filepath} successfully')

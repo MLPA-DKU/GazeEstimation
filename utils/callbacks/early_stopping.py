@@ -1,4 +1,4 @@
-import numpy as np
+import math
 
 
 class EarlyStopping:
@@ -9,7 +9,7 @@ class EarlyStopping:
         self.verbose = verbose
 
         self.counter = 0
-        self.monitor = np.Inf
+        self.monitor = math.inf
         self.early_stop = False
         self.record_breaking = False
         self.message = None
