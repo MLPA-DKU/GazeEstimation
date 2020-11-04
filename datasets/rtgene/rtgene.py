@@ -41,7 +41,6 @@ class RTGENE(VisionDataset):
         self.target = np.vstack(self.target).astype(np.float32)
 
     def __getitem__(self, index):
-
         data = self.data[index]
         headpose = self.headpose[index]
         target = self.target[index]

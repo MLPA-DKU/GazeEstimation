@@ -69,3 +69,29 @@ class Gaze360(VisionDataset):
 
     def __len__(self):
         return len(self.data)
+
+
+class Gaze360Inference(Gaze360):
+
+    def __init__(self, root, transform=None, target_transform=None, mode=None):
+        super(Gaze360Inference, self).__init__(root, transform=transform, target_transform=target_transform, mode=mode)
+
+        self.mode = mode if mode is not None else 'video'
+
+        downloaded_list = self.infer_list
+
+        self.data = []
+        self.target = []
+
+        for line in downloaded_list:
+            line = line[:-1]
+            line = line.replace('\t', ' ')
+            line = line.replace('  ', ' ')
+            split = line.split(' ')
+            if len(split) > 3:
+                name = int(os.path.split(split[0])[1][:-4])
+                path = os.path.join(self.root, self.base_folder, os.path.split(split[0])[0])
+                data = [os.path.join(path, f'{name + i:06d}.jpg') for i in range(-3, 4)]
+                target = np.array([float(v) for v in split[1:4]])
+                self.data.append(data)
+                self.target.append(target)

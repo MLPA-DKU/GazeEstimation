@@ -2,6 +2,7 @@ from . import functional as F
 
 
 class DeNormalize:
+
     def __init__(self, mean, std):
         self.mean = mean
         self.std = std
