@@ -21,6 +21,12 @@ def angle_difference_rad2deg(inputs, targets):
 
 def angle_difference_gaze360(inputs, targets):
 
+    def spherical_to_cartesian(vector):
+        x = torch.cos(vector[:, 1]) * torch.sin(vector[:, 0])
+        y = torch.sin(vector[:, 1])
+        z = -1 * torch.cos(vector[:, 1]) * torch.cos(vector[:, 0])
+        return torch.stack((x, y, z), dim=1)
+
     inputs = spherical_to_cartesian(inputs)
     targets = spherical_to_cartesian(targets)
 
@@ -32,10 +38,3 @@ def angle_difference_gaze360(inputs, targets):
     product = product.data
     product = 180 * torch.mean(product) / math.pi
     return product
-
-
-def spherical_to_cartesian(vector):
-    x = torch.cos(vector[:, 1]) * torch.sin(vector[:, 0])
-    y = torch.sin(vector[:, 1])
-    z = -1 * torch.cos(vector[:, 1]) * torch.cos(vector[:, 0])
-    return torch.stack((x, y, z), dim=1)

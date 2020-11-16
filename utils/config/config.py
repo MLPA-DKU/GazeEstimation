@@ -29,3 +29,9 @@ class ConfigParser(utils.Container):
         assert all([k not in module_name for k in kwargs])
         module_args.update(kwargs)
         return getattr(module, module_name)(*args, **module_args)
+
+
+class ConfigParser2:
+
+    def __init__(self):
+        pass
