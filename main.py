@@ -62,4 +62,4 @@ def validate(dataloader, model, criterion, evaluator, args):
 
 
 if __name__ == '__main__':
-    main(utils.ConfigParser('utils/config/gaze360.json'))
+    pass

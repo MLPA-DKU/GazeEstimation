@@ -12,7 +12,6 @@ class EarlyStopping:
         self.monitor = math.inf
         self.early_stop = False
         self.record_breaking = False
-        self.message = None
 
     def __call__(self, monitor):
         if monitor >= self.monitor - self.delta:

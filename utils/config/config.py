@@ -31,7 +31,10 @@ class ConfigParser(utils.Container):
         return getattr(module, module_name)(*args, **module_args)
 
 
-class ConfigParser2:
 
-    def __init__(self):
-        pass
+def initialize_object(config, module, package, *args, **kwargs):
+    module_name = config[module]['type']
+    module_args = config[module]['args']
+    assert all([k not in module_name for k in kwargs])
+    module_args.update(kwargs)
+    return getattr(package, module_name)(*args, **module_args)
