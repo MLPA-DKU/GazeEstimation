@@ -1,6 +1,5 @@
 import torch
 import torch.nn as nn
-import torch.optim as optim
 import torch.utils.data as loader
 import torchvision.transforms as transforms
 
@@ -31,15 +30,13 @@ def main():
 
     criterion = nn.MSELoss()
     evaluator = modules.AngleError()
-    optimizer = optim.Adam(model.parameters(), lr=0.001, betas=(0.9, 0.95))
-    scheduler = optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer, T_0=5)
+    optimizer = modules.RAdam(model.parameters())
 
     callbacks = ...
 
     for epoch in range(epochs):
         train(trainloader, model, optimizer, criterion, evaluator, callbacks)
         validate(validloader, model, criterion, evaluator, callbacks)
-        scheduler.step(epoch)
 
         if callbacks.early_stop:
             break
