@@ -9,7 +9,13 @@ def predict():
 
 
 def learn():
-    pass
+
+    for epoch in range(10):
+        train()
+        validate()
+        if True:
+            break
+    test()
 
 
 def train():
