@@ -31,7 +31,7 @@ class CheckPoint:
         self.directory = directory
 
         if not os.path.exists(self.directory):
-            os.mkdir(self.directory)
+            os.makedirs(self.directory)
 
     def __call__(self, state, is_best, filename):
         filepath = os.path.join(self.directory, filename)

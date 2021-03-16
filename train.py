@@ -70,7 +70,7 @@ def main():
         optimizer = optim.Lookahead(optim.RAdam(model.parameters()))
         criterion = nn.MSELoss()
         evaluator = modules.AngularError()
-        checkpoint = callbacks.CheckPoint(directory=f'/tmp/pycharm_project_182/saves/fold_{idx + 1}')
+        checkpoint = callbacks.CheckPoint(directory=f'/tmp/pycharm_project_717/saves/fold_{idx + 1}')
         early_stop = callbacks.EarlyStopping(patience=30)
         best_score = np.inf
 
