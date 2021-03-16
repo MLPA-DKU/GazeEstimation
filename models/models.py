@@ -134,15 +134,16 @@ class EEGE(nn.Module):
         )
 
     def forward(self, x):
-        a_maps = self.region_selector(x)
-        feature_0 = self.stem(x * a_maps)
+        # a_maps = self.region_selector(x)
+        # x = x * a_maps
+        feature_0 = self.stem(x)
         feature_1 = self.block_1(feature_0)
         feature_2 = self.block_2(feature_1)
         feature_3 = self.block_3(feature_2)
         feature_4 = self.block_4(feature_3)
-        a_targets = self.hints(feature_4)
+        # a_targets = self.hints(feature_4)
         features = self.conv1(feature_1), self.conv2(feature_2), self.conv3(feature_3), self.conv4(feature_4)
         features = self.fpn(features)
         features = torch.cat([self.gap(f) for f in features], dim=1)
         predictions = self.prediction_head(features)
-        return predictions, a_maps, a_targets
+        return predictions

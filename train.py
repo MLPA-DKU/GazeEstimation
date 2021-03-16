@@ -97,8 +97,8 @@ def train(dataloader, model, optimizer, criterion, evaluator, epoch):
     model.train()
     for idx, data in enumerate(dataloader):
         inputs, targets = utils.load_batch(data, device=device)
-        outputs, a_map, a_target = model(inputs)
-        loss = criterion(outputs, targets) + criterion(a_map, a_target)  # loss_gaze_estimation + loss_region_selection
+        outputs = model(inputs)
+        loss = criterion(outputs, targets)
         score = evaluator(outputs, targets)
         losses.append(loss.item())
         scores.append(score.item())
@@ -123,7 +123,7 @@ def valid(dataloader, model, criterion, evaluator, epoch):
     with torch.no_grad():
         for idx, data in enumerate(dataloader):
             inputs, targets = utils.load_batch(data, device=device)
-            outputs, _, _ = model(inputs)
+            outputs = model(inputs)
             loss = criterion(outputs, targets)
             score = evaluator(outputs, targets)
             losses.append(loss.item())
