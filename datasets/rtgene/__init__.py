@@ -1,1 +1,3 @@
-from .rtgene import *
+from .rtgene import RTGENE
+
+__all__ = 'RTGENE'

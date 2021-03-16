@@ -1,2 +1,4 @@
-from .gaze360 import *
-from .rtgene import *
+from .gaze360 import Gaze360, Gaze360Inference
+from .rtgene import RTGENE
+
+__all__ = ['RTGENE', 'Gaze360', 'Gaze360Inference']
