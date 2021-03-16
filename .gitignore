@@ -1,2 +1,5 @@
 # PyCharm IDE settings
 .idea
+
+# macOS metadata file
+.DS_Store
