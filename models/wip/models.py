@@ -86,6 +86,9 @@ class BiFPN(nn.Module):
 
 class EEGE(nn.Module):
 
+    # ResNet-18 (alternated layer 4 with MHSA) as region selection network
+    # ResNet-50 (alternated layer 4 with MHSA) + BiFPN as gaze estimation network
+
     def __init__(self, num_classes=2):
         super(EEGE, self).__init__()
 

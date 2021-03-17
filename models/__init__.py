@@ -1,3 +1,3 @@
-from .models import EEGE
+from .wip import EEGE
 
-__all__ = 'EEGE'
+__all__ = ['EEGE']
