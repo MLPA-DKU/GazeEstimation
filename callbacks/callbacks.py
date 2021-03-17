@@ -1,8 +1,6 @@
-import os
-import os.path
-import shutil
 import numpy as np
-import torch
+
+from . import functional as F
 
 
 class EarlyStopping:
@@ -25,21 +23,29 @@ class EarlyStopping:
             self.counter = 0
 
 
+def lower_is_better_performance():
+    pass
+
+
+def upper_is_better_performance():
+    pass
+
+
+def is_performance_improved():
+    pass
+
+
 class CheckPoint:
 
-    def __init__(self, directory):
-        self.directory = directory
+    def __init__(self, save_dir):
+        self.save_dir = save_dir
+        F.make_directory_available(self.save_dir)
 
-        if not os.path.exists(self.directory):
-            os.makedirs(self.directory)
-
-    def __call__(self, state, is_best, filename):
-        filepath = os.path.join(self.directory, filename)
-        torch.save(state, filepath)
-        if is_best:
-            shutil.copyfile(filepath, os.path.join(self.directory, 'model_best.pth'))
+    def __call__(self, checkpoint, is_best, checkpoint_name):
+        F.save_checkpoint(checkpoint, checkpoint_name, self.save_dir)
+        F.save_checkpoint(checkpoint, 'checkpoint_best.pth', self.save_dir) if is_best else None
 
 
-class Papyrus:
-
-    pass
+if __name__ == '__main__':
+    epochs = 1000
+    print(F.model_name('checkpoint', epoch=f'{455:>0{len(str(epochs))}d}'))

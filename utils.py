@@ -46,6 +46,16 @@ def update_with_amp(batch, model, optimizer, criterion, scaler, device=None):
     return inputs, targets, outputs, loss
 
 
+def evaluate(batch, model, criterion, evaluator, device=None):
+    model.eval()
+    with torch.no_grad():
+        inputs, targets = load_batch(batch, device=device)
+        outputs = model(inputs)
+        loss = criterion(outputs, targets)
+        score = evaluator(outputs, targets)
+    return loss, score
+
+
 def visualize_gaze_direction_gaze360(tensor, gaze, prediction=None, save=None, length=200):
 
     # PyTorch image tensor shape: CHW

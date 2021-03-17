@@ -74,7 +74,7 @@ def test(dataloader, model, evaluator):
     with torch.no_grad():
         for idx, data in enumerate(dataloader):
             inputs, targets = utils.load_batch(data, device=device)
-            outputs, _, _ = model(inputs)
+            outputs = model(inputs)
             score = evaluator(outputs, targets)
             scores.append(score.item())
 

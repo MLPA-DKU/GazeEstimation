@@ -2,6 +2,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.utils.data as loader
+import torch.utils.tensorboard as tensorboard
 import torchvision.transforms as transforms
 
 import callbacks
@@ -70,13 +71,15 @@ def main():
         optimizer = optim.Lookahead(optim.RAdam(model.parameters()))
         criterion = nn.MSELoss()
         evaluator = modules.AngularError()
-        checkpoint = callbacks.CheckPoint(directory=f'/tmp/pycharm_project_717/saves/fold_{idx + 1}')
-        early_stop = callbacks.EarlyStopping(patience=30)
+
         best_score = np.inf
+        checkpoint = callbacks.CheckPoint(save_dir=f'/tmp/pycharm_project_717/saves/fold_{idx + 1}')
+        early_stop = callbacks.EarlyStopping(patience=30)
+        writer = tensorboard.SummaryWriter(log_dir='./logs/timestamp')
 
         for epoch in range(epochs):
-            train(trainloader, model, optimizer, criterion, evaluator, epoch)
-            score = valid(validloader, model, criterion, evaluator, epoch)
+            train(trainloader, model, optimizer, criterion, evaluator, writer, epoch)
+            score = valid(validloader, model, criterion, evaluator, writer, epoch)
 
             early_stop(score)
             if early_stop.early_stop:
@@ -86,26 +89,23 @@ def main():
 
             is_best = score < best_score
             best_score = min(score, best_score)
-            checkpoint(model, is_best, filename=f'model_epoch_{epoch:>0{len(str(epochs))}d}.pth')
+            checkpoint(model, is_best, checkpoint_name=f'model_epoch_{epoch:>0{len(str(epochs))}d}.pth')
 
 
-def train(dataloader, model, optimizer, criterion, evaluator, epoch):
+def train(dataloader, model, optimizer, criterion, evaluator, writer, epoch):
 
     losses = []
     scores = []
 
     model.train()
-    for idx, data in enumerate(dataloader):
-        inputs, targets = utils.load_batch(data, device=device)
-        outputs = model(inputs)
-        loss = criterion(outputs, targets)
+    for idx, batch in enumerate(dataloader):
+        _, targets, outputs, loss = utils.update(batch, model, optimizer, criterion, device=device)
         score = evaluator(outputs, targets)
         losses.append(loss.item())
         scores.append(score.item())
 
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
+        writer.add_scalar('[TRAIN] Losses', loss.item(), global_step=epoch * len(dataloader) + idx)
+        writer.add_scalar('[TRAIN] Scores', score.item(), global_step=epoch * len(dataloader) + idx)
 
         print(f'\r[TRAIN] Epoch[{epoch + 1:>{len(str(epochs))}}/{epochs}] - '
               f'batch[{idx + 1:>{len(str(len(dataloader)))}}/{len(dataloader)}] - '
@@ -114,24 +114,23 @@ def train(dataloader, model, optimizer, criterion, evaluator, epoch):
     utils.salvage_memory()
 
 
-def valid(dataloader, model, criterion, evaluator, epoch):
+def valid(dataloader, model, criterion, evaluator, writer, epoch):
 
     losses = []
     scores = []
 
     model.eval()
-    with torch.no_grad():
-        for idx, data in enumerate(dataloader):
-            inputs, targets = utils.load_batch(data, device=device)
-            outputs = model(inputs)
-            loss = criterion(outputs, targets)
-            score = evaluator(outputs, targets)
-            losses.append(loss.item())
-            scores.append(score.item())
+    for idx, batch in enumerate(dataloader):
+        loss, score = utils.evaluate(batch, model, criterion, evaluator, device=device)
+        losses.append(loss.item())
+        scores.append(score.item())
 
-            print(f'\r[VALID] Epoch[{epoch + 1:>{len(str(epochs))}}/{epochs}] - '
-                  f'batch[{idx + 1:>{len(str(len(dataloader)))}}/{len(dataloader)}] - '
-                  f'loss: {np.nanmean(losses):.3f} - angular error: {np.nanmean(scores):.3f}', end='')
+        writer.add_scalar('[VALID] Losses', loss.item(), global_step=epoch * len(dataloader) + idx)
+        writer.add_scalar('[VALID] Scores', score.item(), global_step=epoch * len(dataloader) + idx)
+
+        print(f'\r[VALID] Epoch[{epoch + 1:>{len(str(epochs))}}/{epochs}] - '
+              f'batch[{idx + 1:>{len(str(len(dataloader)))}}/{len(dataloader)}] - '
+              f'loss: {np.nanmean(losses):.3f} - angular error: {np.nanmean(scores):.3f}', end='')
     print(f'\n[ RES ] Epoch[{epoch + 1:>{len(str(epochs))}}/{epochs}] - '
           f'angular error (°) [{np.nanmean(scores):.3f}|{np.nanstd(scores):.3f}|'
           f'{np.min(scores):.3f}|{np.max(scores):.3f}:MEAN|STD|MIN|MAX]')
