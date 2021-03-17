@@ -8,7 +8,7 @@ import callbacks
 import datasets
 import models
 import modules
-import modules.optimizer as optim
+import modules.optimizers as optim
 import utils
 
 

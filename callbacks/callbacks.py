@@ -38,3 +38,8 @@ class CheckPoint:
         torch.save(state, filepath)
         if is_best:
             shutil.copyfile(filepath, os.path.join(self.directory, 'model_best.pth'))
+
+
+class Papyrus:
+
+    pass
