@@ -74,18 +74,16 @@ def main():
 
         best_score = np.inf
         checkpoint = callbacks.CheckPoint(save_dir=f'/tmp/pycharm_project_717/saves/fold_{idx + 1}')
-        early_stop = callbacks.EarlyStopping(patience=30)
+        early_stop = callbacks.EarlyStopping(patience=30, epochs=epochs)
         writer = tensorboard.SummaryWriter(log_dir='./logs/timestamp')
 
         for epoch in range(epochs):
             train(trainloader, model, optimizer, criterion, evaluator, writer, epoch)
             score = valid(validloader, model, criterion, evaluator, writer, epoch)
 
-            early_stop(score)
+            early_stop(score, epoch)
             if early_stop.early_stop:
                 break
-            print(f'[ RES ] Epoch[{epoch + 1:>{len(str(epochs))}}/{epochs}] - '
-                  f'early stopping count: {early_stop.counter:>{len(str(early_stop.patience))}}/{early_stop.patience}')
 
             is_best = score < best_score
             best_score = min(score, best_score)
@@ -106,10 +104,7 @@ def train(dataloader, model, optimizer, criterion, evaluator, writer, epoch):
 
         writer.add_scalar('[TRAIN] Losses', loss.item(), global_step=epoch * len(dataloader) + idx)
         writer.add_scalar('[TRAIN] Scores', score.item(), global_step=epoch * len(dataloader) + idx)
-
-        print(f'\r[TRAIN] Epoch[{epoch + 1:>{len(str(epochs))}}/{epochs}] - '
-              f'batch[{idx + 1:>{len(str(len(dataloader)))}}/{len(dataloader)}] - '
-              f'loss: {np.nanmean(losses):.3f} - angular error: {np.nanmean(scores):.3f}', end='')
+        utils.print_result(epoch, epochs, idx, dataloader, losses, scores, header='TRAIN')
     print()
     utils.salvage_memory()
 
@@ -127,13 +122,8 @@ def valid(dataloader, model, criterion, evaluator, writer, epoch):
 
         writer.add_scalar('[VALID] Losses', loss.item(), global_step=epoch * len(dataloader) + idx)
         writer.add_scalar('[VALID] Scores', score.item(), global_step=epoch * len(dataloader) + idx)
-
-        print(f'\r[VALID] Epoch[{epoch + 1:>{len(str(epochs))}}/{epochs}] - '
-              f'batch[{idx + 1:>{len(str(len(dataloader)))}}/{len(dataloader)}] - '
-              f'loss: {np.nanmean(losses):.3f} - angular error: {np.nanmean(scores):.3f}', end='')
-    print(f'\n[ RES ] Epoch[{epoch + 1:>{len(str(epochs))}}/{epochs}] - '
-          f'angular error (°) [{np.nanmean(scores):.3f}|{np.nanstd(scores):.3f}|'
-          f'{np.min(scores):.3f}|{np.max(scores):.3f}:MEAN|STD|MIN|MAX]')
+        utils.print_result(epoch, epochs, idx, dataloader, losses, scores, header='VALID')
+    utils.print_result_on_epoch_end(epoch, epochs, scores)
     utils.salvage_memory()
 
     return np.nanmean(scores)

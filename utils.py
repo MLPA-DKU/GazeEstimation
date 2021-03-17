@@ -1,5 +1,6 @@
 from PIL import ImageDraw
 import gc
+import numpy as np
 import torch
 import torchvision.transforms as transforms
 import matplotlib.pyplot as plt
@@ -54,6 +55,18 @@ def evaluate(batch, model, criterion, evaluator, device=None):
         loss = criterion(outputs, targets)
         score = evaluator(outputs, targets)
     return loss, score
+
+
+def print_result(epoch, epochs, idx, dataloader, losses, scores, header=None):
+    print(f'\r[{header}] Epoch[{epoch + 1:>{len(str(epochs))}}/{epochs}] - '
+          f'batch[{idx + 1:>{len(str(len(dataloader)))}}/{len(dataloader)}] - '
+          f'loss: {np.nanmean(losses):.3f} - angular error: {np.nanmean(scores):.3f}', end='')
+
+
+def print_result_on_epoch_end(epoch, epochs, scores):
+    print(f'\n[ RES ] Epoch[{epoch + 1:>{len(str(epochs))}}/{epochs}] - '
+          f'angular error (°) [{np.nanmean(scores):.3f}|{np.nanstd(scores):.3f}|'
+          f'{np.min(scores):.3f}|{np.max(scores):.3f}:MEAN|STD|MIN|MAX]')
 
 
 def visualize_gaze_direction_gaze360(tensor, gaze, prediction=None, save=None, length=200):
