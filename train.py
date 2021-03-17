@@ -1,3 +1,4 @@
+import time
 import numpy as np
 import torch
 import torch.nn as nn
@@ -75,7 +76,7 @@ def main():
         best_score = np.inf
         checkpoint = callbacks.CheckPoint(save_dir=f'/tmp/pycharm_project_717/saves/fold_{idx + 1}')
         early_stop = callbacks.EarlyStopping(patience=30, epochs=epochs)
-        writer = tensorboard.SummaryWriter(log_dir='./logs/timestamp')
+        writer = tensorboard.SummaryWriter(log_dir=f"./logs/{int(str(time.time()).split('.')[1]):07d}")
 
         for epoch in range(epochs):
             train(trainloader, model, optimizer, criterion, evaluator, writer, epoch)
