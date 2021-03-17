@@ -111,7 +111,7 @@ class EEGE(nn.Module):
         self.block_1 = self.backbone_gaze[4]
         self.block_2 = self.backbone_gaze[5]
         self.block_3 = self.backbone_gaze[6]
-        self.block_4 = bot.BottleStack(dim=1024, fmap_size=14, dim_out=2048, proj_factor=4, downsample=True,
+        self.block_4 = bot.BottleStack(dim=1024, fmap_size=32, dim_out=2048, proj_factor=4, downsample=True,
                                        heads=4, dim_head=128, rel_pos_emb=True, activation=nn.ReLU())
 
         # gaze estimation - feature pyramid

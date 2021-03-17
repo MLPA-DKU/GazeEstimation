@@ -44,7 +44,7 @@ subjects_list_tests = [
 data_type = ['face']
 
 # dataloader option
-batch_size = 128
+batch_size = 32
 num_workers = 16
 
 
@@ -54,7 +54,7 @@ def main():
 
         transform = transforms.Compose([
             transforms.ToTensor(),
-            transforms.RandomResizedCrop(224, scale=(0.7, 1.0), ratio=(1.0, 1.0)),
+            transforms.RandomResizedCrop(512, scale=(0.7, 1.0), ratio=(1.0, 1.0)),
             transforms.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
         ])
 
