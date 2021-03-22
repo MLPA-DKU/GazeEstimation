@@ -103,8 +103,8 @@ def train(dataloader, model, optimizer, criterion, evaluator, writer, epoch):
         losses.append(loss.item())
         scores.append(score.item())
 
-        writer.add_scalar('[TRAIN] Losses', loss.item(), global_step=epoch * len(dataloader) + idx)
-        writer.add_scalar('[TRAIN] Scores', score.item(), global_step=epoch * len(dataloader) + idx)
+        writer.add_scalar('[TRAIN] Losses', loss.item(), global_step=epoch*len(dataloader)+idx)
+        writer.add_scalar('[TRAIN] Scores', score.item(), global_step=epoch*len(dataloader)+idx)
         utils.print_result(epoch, epochs, idx, dataloader, losses, scores, header='TRAIN')
     print()
     utils.salvage_memory()
@@ -121,8 +121,8 @@ def valid(dataloader, model, criterion, evaluator, writer, epoch):
         losses.append(loss.item())
         scores.append(score.item())
 
-        writer.add_scalar('[VALID] Losses', loss.item(), global_step=epoch * len(dataloader) + idx)
-        writer.add_scalar('[VALID] Scores', score.item(), global_step=epoch * len(dataloader) + idx)
+        writer.add_scalar('[VALID] Losses', loss.item(), global_step=epoch*len(dataloader)+idx)
+        writer.add_scalar('[VALID] Scores', score.item(), global_step=epoch*len(dataloader)+idx)
         utils.print_result(epoch, epochs, idx, dataloader, losses, scores, header='VALID')
     utils.print_result_on_epoch_end(epoch, epochs, scores)
     utils.salvage_memory()

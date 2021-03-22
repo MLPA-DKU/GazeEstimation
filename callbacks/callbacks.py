@@ -36,6 +36,3 @@ class CheckPoint:
     def __call__(self, checkpoint, is_best, checkpoint_name):
         F.save_checkpoint(checkpoint, checkpoint_name, self.save_dir)
         F.save_checkpoint(checkpoint, 'checkpoint_best.pth', self.save_dir) if is_best else None
-
-
-# checkpoint.exid.{timestamp}.epoch.{epoch:>0{len(str(epochs))}d}.device.{device}.pth

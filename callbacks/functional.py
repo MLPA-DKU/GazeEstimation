@@ -1,5 +1,6 @@
 import os
 import os.path
+import uuid
 import torch
 
 
@@ -13,6 +14,25 @@ def save_checkpoint(checkpoint, checkpoint_name, save_dir):
     torch.save(checkpoint, p)
 
 
-# {head}_{epoch}_{????:>0{len(str(epoch))}d}_{loss}_{?.???:.3f}
-def model_name(head, **kwargs):
-    return head + '_' + '_'.join([f'{k}_{v}' for k, v in kwargs.items()]) + '.pth'
+def gen_experiment_unique_id_simple():
+    return str(uuid.uuid4()).split('-')[0]
+
+
+def gen_experiment_unique_id_full():
+    return str(uuid.uuid4())
+
+
+def get_experiment_unique_id(full_length=False):
+    experiment_id = gen_experiment_unique_id_full() if full_length else gen_experiment_unique_id_simple()
+    return experiment_id
+
+
+# runs folder tree
+# runs/
+#     experiment.exid.{identifier}/
+#         logs.exid.{identifier}/
+#             tfevents...
+#         save.exid.{identifier}/
+#             checkpoint.exid.{identifier}.epoch.{epoch}.pth
+#             checkpoint.exid.{identifier}.best.pth
+#             ...
