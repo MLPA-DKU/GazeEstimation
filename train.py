@@ -26,7 +26,7 @@ fold_dict = {
     'fold_1': ['s001', 's002', 's008', 's010'],  # fold 1 for train, test
     'fold_2': ['s003', 's004', 's007', 's009'],  # fold 2 for train, test
     'fold_3': ['s005', 's006', 's011', 's012', 's013'],  # fold 3 for train, test
-    'fold_4': ['s014', 's015', 's016'],  # fold 4 for validation`
+    'fold_4': ['s014', 's015', 's016'],  # fold 4 for validation
 }
 subjects_list_train = [
     fold_dict['fold_1'] + fold_dict['fold_2'],  # 1, 2
