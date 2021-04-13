@@ -5,11 +5,11 @@ import torch.utils.data as loader
 import torch.utils.tensorboard as tensorboard
 import torchvision.transforms as transforms
 
-import profiler
 import datasets
 import models
 import modules
 import modules.optimizers as optim
+import profiler
 import utils
 
 utils.enable_easy_debug(False)
@@ -21,27 +21,6 @@ epochs = 1000
 
 # dataset option
 root = '/mnt/datasets/RT-GENE'
-fold_dict = {
-    'fold_1': ['s001', 's002', 's008', 's010'],  # fold 1 for train, test
-    'fold_2': ['s003', 's004', 's007', 's009'],  # fold 2 for train, test
-    'fold_3': ['s005', 's006', 's011', 's012', 's013'],  # fold 3 for train, test
-    'fold_4': ['s014', 's015', 's016'],  # fold 4 for validation
-}
-subjects_list_train = [
-    fold_dict['fold_1'] + fold_dict['fold_2'],  # 1, 2
-    fold_dict['fold_1'] + fold_dict['fold_3'],  # 1, 3
-    fold_dict['fold_2'] + fold_dict['fold_3'],  # 2, 3
-]
-subjects_list_valid = [
-    fold_dict['fold_4'],
-    fold_dict['fold_4'],
-    fold_dict['fold_4'],
-]
-subjects_list_tests = [
-    fold_dict['fold_3'],  # 3
-    fold_dict['fold_2'],  # 2
-    fold_dict['fold_1'],  # 1
-]
 data_type = ['face']
 
 # dataloader option
@@ -50,6 +29,9 @@ num_workers = 16
 
 
 def main():
+
+    subjects_list_train = datasets.rtgene.subjects_list_train
+    subjects_list_valid = datasets.rtgene.subjects_list_valid
 
     for idx, (subjects_train, subjects_valid) in enumerate(zip(subjects_list_train, subjects_list_valid)):
 
