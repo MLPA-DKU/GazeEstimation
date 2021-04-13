@@ -95,19 +95,6 @@ class EEGE(nn.Module):
         # common modules
         self.gap = nn.AdaptiveAvgPool2d(1)
 
-        # region selection
-        self.backbone_region = list(models.resnet18().children())[:7]
-        self.attention_layer = bot.BottleStack(dim=256, fmap_size=14, dim_out=512, proj_factor=4, downsample=True,
-                                               heads=4, dim_head=64, rel_pos_emb=True, activation=nn.ReLU())
-        self.region_selector = nn.Sequential(
-            *self.backbone_region,
-            self.attention_layer,
-            nn.Conv2d(in_channels=512, out_channels=1, kernel_size=1, stride=1),
-            nn.BatchNorm2d(1),
-            nn.ReLU(),
-            nn.Upsample(224)
-        )
-
         # gaze estimation - feature extraction
         self.backbone_gaze = list(models.resnet50().children())[:7]
         self.stem = nn.Sequential(*self.backbone_gaze[:4])
@@ -137,14 +124,11 @@ class EEGE(nn.Module):
         )
 
     def forward(self, x):
-        # a_maps = self.region_selector(x)
-        # x = x * a_maps
         feature_0 = self.stem(x)
         feature_1 = self.block_1(feature_0)
         feature_2 = self.block_2(feature_1)
         feature_3 = self.block_3(feature_2)
         feature_4 = self.block_4(feature_3)
-        # a_targets = self.hints(feature_4)
         features = self.conv1(feature_1), self.conv2(feature_2), self.conv3(feature_3), self.conv4(feature_4)
         features = self.fpn(features)
         features = torch.cat([self.gap(f) for f in features], dim=1)

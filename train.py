@@ -1,20 +1,19 @@
 import time
 import numpy as np
-import torch
 import torch.nn as nn
 import torch.utils.data as loader
 import torch.utils.tensorboard as tensorboard
 import torchvision.transforms as transforms
 
-import callbacks
+import profiler
 import datasets
 import models
 import modules
 import modules.optimizers as optim
 import utils
 
-
-torch.autograd.set_detect_anomaly(True)
+utils.enable_easy_debug(False)
+utils.enable_reproducibility(False)
 
 # global settings
 device = 'cuda:0'
@@ -74,8 +73,8 @@ def main():
         evaluator = modules.AngularError()
 
         best_score = np.inf
-        checkpoint = callbacks.CheckPoint(save_dir=f'/tmp/pycharm_project_717/saves/fold_{idx + 1}')
-        early_stop = callbacks.EarlyStopping(patience=30, epochs=epochs)
+        checkpoint = profiler.CheckPoint(save_dir=f'/tmp/pycharm_project_717/saves/fold_{idx + 1}')
+        early_stop = profiler.EarlyStopping(patience=30, epochs=epochs)
         writer = tensorboard.SummaryWriter(log_dir=f"./logs/{int(str(time.time()).split('.')[1]):07d}")
 
         for epoch in range(epochs):

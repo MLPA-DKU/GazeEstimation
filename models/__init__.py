@@ -1,3 +1,3 @@
-from .wip import EEGE
+from .winterchild import EEGE
 
 __all__ = ['EEGE']

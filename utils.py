@@ -1,7 +1,9 @@
 from PIL import ImageDraw
 import gc
+import random
 import numpy as np
 import torch
+import torch.backends.cudnn
 import torchvision.transforms as transforms
 import matplotlib.pyplot as plt
 
@@ -21,6 +23,22 @@ def load_batch(batch, device=None, non_blocking=False):
 def salvage_memory():
     torch.cuda.empty_cache()
     gc.collect()
+
+
+def enable_easy_debug(enable=False):
+    torch.autograd.set_detect_anomaly(enable)
+
+
+def enable_reproducibility(enable=False, random_seed=42, parallel=False):
+    if enable:
+        torch.manual_seed(random_seed)
+        torch.cuda.manual_seed(random_seed)
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
+        np.random.seed(random_seed)
+        random.seed(random_seed)
+    if parallel:
+        torch.cuda.manual_seed_all(random_seed)
 
 
 def update(batch, model, optimizer, criterion, device=None):
