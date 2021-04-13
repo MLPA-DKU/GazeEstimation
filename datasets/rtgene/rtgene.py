@@ -27,11 +27,11 @@ class RTGENE(VisionDataset):
                     face = os.path.join(base_folder, 'face', f'face_{int(split[0]):06d}_rgb.png')
                     left = os.path.join(base_folder, 'left', f'left_{int(split[0]):06d}_rgb.png')
                     right = os.path.join(base_folder, 'right', f'right_{int(split[0]):06d}_rgb.png')
-                    # if os.path.exists(head) and os.path.exists(face) and os.path.exists(left) and os.path.exists(right):
-                    #     headpose = (float(split[1].strip()[1:]), float(split[2].strip()[:-1]))
-                    #     gaze = (float(split[3].strip()[1:]), float(split[4].strip()[:-1]))
-                    headpose = (float(split[1].strip()[1:]), float(split[2].strip()[:-1]))
-                    gaze = (float(split[3].strip()[1:]), float(split[4].strip()[:-1]))
+                    if os.path.exists(head) and os.path.exists(face) and os.path.exists(left) and os.path.exists(right):
+                        headpose = (float(split[1].strip()[1:]), float(split[2].strip()[:-1]))
+                        gaze = (float(split[3].strip()[1:]), float(split[4].strip()[:-1]))
+                    # headpose = (float(split[1].strip()[1:]), float(split[2].strip()[:-1]))
+                    # gaze = (float(split[3].strip()[1:]), float(split[4].strip()[:-1]))
                     data = {'head': head, 'face': face, 'left': left, 'right': right}
                     data = [data[k] for k in self.data_type]
 
