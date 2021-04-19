@@ -22,10 +22,7 @@ trans = transforms.Compose([
     ])
 
 
-def get_train_loader(data_dir,
-                           batch_size,
-                           num_workers=4,
-                           is_shuffle=True):
+def get_train_loader(data_dir, batch_size, num_workers=4, is_shuffle=True):
     # load dataset
     refer_list_file = os.path.join(data_dir, 'train_test_split.json')
     print('load the train file list from: ', refer_list_file)
@@ -45,13 +42,10 @@ def get_train_loader(data_dir,
     return train_loader
 
 
-def get_test_loader(data_dir,
-                           batch_size,
-                           num_workers=4,
-                           is_shuffle=True):
+def get_test_loader(data_dir, batch_size, num_workers=4, is_shuffle=True):
     # load dataset
     refer_list_file = os.path.join(data_dir, 'train_test_split.json')
-    print('load the train file list from: ', refer_list_file)
+    print('load the test file list from: ', refer_list_file)
 
     with open(refer_list_file, 'r') as f:
         datastore = json.load(f)
