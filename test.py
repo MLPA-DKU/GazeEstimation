@@ -88,12 +88,6 @@ def test(dataloader, model, evaluator):
 
     return scores
 
-    # plot performance graph
-    # plt.plot(range(len(dataloader)), sorted(scores))
-    # plt.axhline(y=7.9, color='r', linewidth=1) # performance of reference RT-GENE
-    # plt.axhline(y=np.nanmean(scores), color='g', linewidth=1) # performance of current models
-    # plt.show()
-
 
 if __name__ == '__main__':
     main()
