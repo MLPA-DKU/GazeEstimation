@@ -1,4 +1,4 @@
-from .common import DSConvBlock, BiFPN
-from .winterchild import EEGE
+from .common import DSConvBlock, SEBlock, BiFPN
+from .proposed import EEGE
 
-__all__ = ['DSConvBlock', 'BiFPN', 'EEGE']
+__all__ = ['DSConvBlock', 'SEBlock', 'BiFPN', 'EEGE']

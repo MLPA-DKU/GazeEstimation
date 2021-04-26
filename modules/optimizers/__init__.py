@@ -1,5 +1,5 @@
 from .adabelief import AdaBelief
-from .radam import RAdam
 from .lookahead import Lookahead
+from .radam import RAdam
 
-__all__ = ['AdaBelief', 'RAdam', 'Lookahead']
+__all__ = ['AdaBelief', 'Lookahead', 'RAdam']

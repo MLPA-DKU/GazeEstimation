@@ -1,4 +1,4 @@
-from .blocks import DSConvBlock
+from .blocks import DSConvBlock, SEBlock
 from .pyramids import BiFPN
 
-__all__ = ['DSConvBlock', 'BiFPN']
+__all__ = ['DSConvBlock', 'SEBlock', 'BiFPN']

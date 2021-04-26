@@ -20,7 +20,7 @@ epochs = 1000
 root = '/mnt/datasets/Gaze/Gaze360'
 
 # dataloader option
-batch_size = 32
+batch_size = 64
 num_workers = 16
 
 
@@ -28,7 +28,7 @@ def main():
 
     transform = transforms.Compose([
         transforms.ToTensor(),
-        transforms.RandomResizedCrop(512, scale=(0.7, 1.0), ratio=(1.0, 1.0)),
+        transforms.RandomResizedCrop(224, scale=(0.7, 1.0), ratio=(1.0, 1.0)),
         transforms.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
     ])
 
@@ -48,7 +48,8 @@ def main():
 
     for epoch in range(epochs):
         train(trainloader, model, optimizer, criterion, evaluator, epoch)
-        score = valid(validloader, model, criterion, evaluator, epoch)
+        valid(validloader, model, criterion, evaluator, epoch)
+
 
 def train(dataloader, model, optimizer, criterion, evaluator, epoch):
 
@@ -79,7 +80,6 @@ def valid(dataloader, model, criterion, evaluator, epoch):
         utils.print_result(epoch, epochs, idx, dataloader, losses, scores, header='VALID')
     utils.print_result_on_epoch_end(epoch, epochs, scores)
     utils.salvage_memory()
-
     return np.nanmean(scores)
 
 
