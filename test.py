@@ -5,7 +5,7 @@ import torchvision.transforms as transforms
 
 import datasets
 import modules
-import utils
+from utils import utils
 
 # global settings
 device = 'cuda:0'

@@ -6,15 +6,15 @@ import torchvision.transforms as transforms
 import datasets
 import models
 import modules
+import modules.engine as engine
 import modules.optimizers as optim
-import navigator as navi
 import utils
 
 utils.enable_easy_debug(False)
 utils.enable_reproducibility(False)
 
 # global settings
-device = navi.auto_device()
+device = utils.auto_device()
 epochs = 1000
 
 # dataset option
@@ -59,7 +59,7 @@ def train(dataloader, model, optimizer, criterion, evaluator, epoch):
 
     model.train()
     for idx, batch in enumerate(dataloader):
-        _, targets, outputs, loss = utils.update(batch, model, optimizer, criterion, device=device)
+        _, targets, outputs, loss = engine.update(batch, model, optimizer, criterion, device=device)
         score = evaluator(outputs, targets)
         losses.append(loss.item())
         scores.append(score.item())
@@ -75,7 +75,7 @@ def valid(dataloader, model, criterion, evaluator, epoch):
 
     model.eval()
     for idx, batch in enumerate(dataloader):
-        loss, score = utils.evaluate(batch, model, criterion, evaluator, device=device)
+        loss, score = engine.evaluate(batch, model, criterion, evaluator, device=device)
         losses.append(loss.item())
         scores.append(score.item())
         utils.print_result(epoch, epochs, idx, dataloader, losses, scores, header='VALID')
