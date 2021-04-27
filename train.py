@@ -7,13 +7,14 @@ import datasets
 import models
 import modules
 import modules.optimizers as optim
+import navigator as navi
 import utils
 
 utils.enable_easy_debug(False)
 utils.enable_reproducibility(False)
 
 # global settings
-device = 'cuda:0'
+device = navi.auto_device()
 epochs = 1000
 
 # dataset option
