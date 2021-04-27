@@ -1,3 +1,3 @@
-from .engine import update, update_with_amp, evaluate
+from .engine import load_batch, update, update_with_amp, evaluate
 
-__all__ = ['update', 'update_with_amp', 'evaluate']
+__all__ = ['load_batch', 'update', 'update_with_amp', 'evaluate']

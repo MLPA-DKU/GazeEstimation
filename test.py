@@ -5,7 +5,8 @@ import torchvision.transforms as transforms
 
 import datasets
 import modules
-from utils import utils
+import modules.engine as engine
+import utils
 
 # global settings
 device = 'cuda:0'
@@ -73,7 +74,7 @@ def test(dataloader, model, evaluator):
     model.eval()
     with torch.no_grad():
         for idx, data in enumerate(dataloader):
-            inputs, targets = utils.load_batch(data, device=device)
+            inputs, targets = engine.load_batch(data, device=device)
             outputs = model(inputs)
             score = evaluator(outputs, targets)
             scores.append(score.item())
