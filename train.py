@@ -6,8 +6,6 @@ import torchvision.transforms as transforms
 import datasets
 import models
 import modules
-import modules.engine as engine
-import modules.optimizers as optim
 import utils
 
 utils.enable_easy_debug(False)
@@ -41,47 +39,32 @@ def main():
     model = models.EEGE()
     model.to(device)
 
-    optimizer = optim.Lookahead(optim.RAdam(model.parameters()))
+    optimizer = modules.Lookahead(modules.RAdam(model.parameters()))
     criterion = nn.MSELoss()
     evaluator = modules.AngularError()
 
     # TODO: replace with integrated callback module
 
     for epoch in range(epochs):
-        train(trainloader, model, optimizer, criterion, evaluator, epoch)
-        valid(validloader, model, criterion, evaluator, epoch)
+        train(trainloader, model, optimizer, criterion, evaluator)
+        valid(validloader, model, criterion, evaluator)
 
 
-def train(dataloader, model, optimizer, criterion, evaluator, epoch):
-
-    losses = []
-    scores = []
+def train(dataloader, model, optimizer, criterion, evaluator):
 
     model.train()
     for idx, batch in enumerate(dataloader):
-        _, targets, outputs, loss = engine.update(batch, model, optimizer, criterion, device=device)
+        _, targets, outputs, loss = modules.update(batch, model, optimizer, criterion, device=device)
         score = evaluator(outputs, targets)
-        losses.append(loss.item())
-        scores.append(score.item())
-        utils.print_result(epoch, epochs, idx, dataloader, losses, scores, header='TRAIN')
-    print()
     utils.salvage_memory()
 
 
-def valid(dataloader, model, criterion, evaluator, epoch):
-
-    losses = []
-    scores = []
+def valid(dataloader, model, criterion, evaluator):
 
     model.eval()
     for idx, batch in enumerate(dataloader):
-        loss, score = engine.evaluate(batch, model, criterion, evaluator, device=device)
-        losses.append(loss.item())
-        scores.append(score.item())
-        utils.print_result(epoch, epochs, idx, dataloader, losses, scores, header='VALID')
-    utils.print_result_on_epoch_end(epoch, epochs, scores)
+        loss, score = modules.evaluate(batch, model, criterion, evaluator, device=device)
     utils.salvage_memory()
-    return np.nanmean(scores)
 
 
 if __name__ == '__main__':
