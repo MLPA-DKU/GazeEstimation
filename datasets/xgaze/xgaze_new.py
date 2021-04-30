@@ -12,11 +12,8 @@ class XGaze(VisionDataset):
 
         self.train = train  # training set or test set
         self.subjects = 'train' if self.train else 'test'
-        self.hdf = None
-        self.hdfs = {}
 
         self.data = []
-        self.target = []
 
         with open(os.path.join(root, 'train_test_split.json'), 'r') as f:
             data_list = json.load(f)
@@ -25,38 +22,37 @@ class XGaze(VisionDataset):
         assert len(self.selected_keys) > 0
 
         for idx in range(len(self.selected_keys)):
-            path = os.path.join(self.root, self.subjects, self.selected_keys[idx])
-            self.hdfs[idx] = h5py.File(path, 'r', swmr=True)
-            assert self.hdfs[idx].swmr_mode
-
-        for idx in range(len(self.selected_keys)):
-            num = self.hdfs[idx]['face_patch'].shape[0]
-            self.data += [(idx, i) for i in range(num)]
-
-        for idx in range(len(self.hdfs)):
-            if self.hdfs[idx]:
-                self.hdfs[idx].close()
-                self.hdfs[idx] = None
+            hdf = h5py.File(os.path.join(self.root, self.subjects, self.selected_keys[idx]), 'r', swmr=True)
+            assert hdf.swmr_mode
+            self.data += [(idx, i) for i in range(hdf['face_patch'].shape[0])]
+            hdf.close()
 
     def __getitem__(self, index):
         key, index = self.data[index]
 
-        self.hdf = h5py.File(os.path.join(self.root, self.subjects, self.selected_keys[key]), 'r', swmr=True)
-        assert self.hdf.swmr_mode
+        hdf = h5py.File(os.path.join(self.root, self.subjects, self.selected_keys[key]), 'r', swmr=True)
+        assert hdf.swmr_mode
 
-        inputs = self.hdf['face_patch'][index, :]
+        inputs = hdf['face_patch'][index, :]
         inputs = inputs[:, :, [2, 1, 0]]
 
-        target = self.hdf['face_gaze'][index, :]
-        target = target.astype('float')
+        targets = hdf['face_gaze'][index, :]
+        targets = targets.astype('float')
 
         if self.transform is not None:
             inputs = self.transform(inputs)
 
         if self.target_transform is not None:
-            target = self.target_transform(target)
+            targets = self.target_transform(targets)
 
-        return inputs, target
+        return inputs, targets
 
     def __len__(self):
         return len(self.data)
+
+
+if __name__ == '__main__':
+    from torch.utils.data import DataLoader
+    dataset = XGaze(root='/mnt/saves/ETH-XGaze/xgaze_224', train=True)
+    dataloader = DataLoader(dataset, batch_size=16, shuffle=False)
+    breakpoint()
