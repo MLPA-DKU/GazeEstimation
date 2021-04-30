@@ -28,31 +28,22 @@ class XGaze(VisionDataset):
             hdf.close()
 
     def __getitem__(self, index):
-        key, index = self.data[index]
-
+        key, datapoint = self.data[index]
         hdf = h5py.File(os.path.join(self.root, self.subjects, self.selected_keys[key]), 'r', swmr=True)
         assert hdf.swmr_mode
 
-        inputs = hdf['face_patch'][index, :]
-        inputs = inputs[:, :, [2, 1, 0]]
-
-        targets = hdf['face_gaze'][index, :]
-        targets = targets.astype('float')
+        data = hdf['face_patch'][datapoint, :]
+        data = data[:, :, [2, 1, 0]]
+        target = hdf['face_gaze'][datapoint, :]
+        target = target.astype('float')
 
         if self.transform is not None:
-            inputs = self.transform(inputs)
+            data = self.transform(data)
 
         if self.target_transform is not None:
-            targets = self.target_transform(targets)
+            target = self.target_transform(target)
 
-        return inputs, targets
+        return data, target
 
     def __len__(self):
         return len(self.data)
-
-
-if __name__ == '__main__':
-    from torch.utils.data import DataLoader
-    dataset = XGaze(root='/mnt/saves/ETH-XGaze/xgaze_224', train=True)
-    dataloader = DataLoader(dataset, batch_size=16, shuffle=False)
-    breakpoint()
