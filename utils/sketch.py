@@ -1,4 +1,5 @@
 import collections
+import numpy as np
 
 
 class ScoreContainer:
@@ -63,3 +64,5 @@ if __name__ == '__main__':
             board.batch_end()
 
         board.epoch_end()
+
+    breakpoint()

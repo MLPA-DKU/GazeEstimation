@@ -133,5 +133,5 @@ class GazeDataset(Dataset):
 
 
 if __name__ == '__main__':
-    trainloader = get_train_loader('/mnt/saves/ETH-XGaze/xgaze_224', batch_size=64, num_workers=16)
+    trainloader = get_train_loader('/mnt/saves/ETH-XGaze/xgaze_224', batch_size=64, num_workers=0)
     breakpoint()

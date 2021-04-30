@@ -1,44 +1,54 @@
+import gc
+import os
+import uuid
+
 import numpy as np
+import torch
+import torch.utils.tensorboard
 
 
-class ScoreCheck:
+class TerminatorModule:
 
-    def __init__(self, delta=0):
-        self.delta = delta
-        self.best_score = np.inf
-
-    def __call__(self, score):
-        is_best = True if score < self.best_score - self.delta else False
-        self.best_score = min(score, self.best_score - self.delta)
-        return is_best
-
-
-class EarlyBird:
-
-    def __init__(self, monitor=None, patience=0, delta=0, verbose=0):
+    def __init__(self, monitor=None, patience=0, delta=0):
         self.monitor = monitor
         self.patience = patience
-        self.is_best = ScoreCheck(delta=delta)
+        self.delta = delta
+
+        self.best_score = np.inf
         self.counter = 1
-        self.verbose = verbose
 
-    def __call__(self, monitor=None):
-
+    def __call__(self):
         if self.counter == self.patience:
-            quit()
+            self.__terminator__()
+        self.counter = 1 if self.__discriminator__() else self.counter + 1
 
-        assert (self.monitor is not None or monitor is not None)
-        monitor = self.monitor[-1] if monitor is None else monitor
-        if self.is_best(monitor):
-            self.counter = 1
-        else:
-            self.counter += 1
+    def __discriminator__(self):
+        is_best = True if self.monitor < self.best_score - self.delta else False
+        self.best_score = min(self.monitor, self.best_score - self.delta)
+        return is_best
 
-        if self.verbose > 0:
-            print(f'EarlyBird Counter [{self.counter}/{self.patience}]')
+    def __terminator__(self):
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+        gc.collect()
+        quit()
 
 
-class SavingModule:
+class CheckpointModule:
+
+    base_folder = 'checkpoint'
+
+    def __init__(self, path, unique_id, obj):
+        self.path = os.path.join([path, self.base_folder, f'{self.base_folder}.{unique_id}'])
+        if os.path.exists(self.path):
+            os.makedirs(self.path)
+        self.target = obj
+
+    def __call__(self):
+        pass
+
+
+class IntegratedManagementModule:
 
     def __init__(self):
         pass
