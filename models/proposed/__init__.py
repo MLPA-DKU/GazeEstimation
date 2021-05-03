@@ -1,3 +1,3 @@
-from .gazenet import EEGE
+from .proposed import EEGE
 
 __all__ = ['EEGE']

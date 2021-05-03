@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-import torchvision.models as modellib
+import torchvision.models as models
 
 from models.common.pyramids import BiFPN
 
@@ -14,7 +14,7 @@ class EEGE(nn.Module):
         self.gap = nn.AdaptiveAvgPool2d(1)
 
         # feature extraction
-        self.backbone_gaze = list(modellib.resnet50().children())[:8]
+        self.backbone_gaze = list(models.resnet50().children())[:8]
         self.stem = nn.Sequential(*self.backbone_gaze[:3])
         self.pool = self.backbone_gaze[3]
         self.block_1 = self.backbone_gaze[4]

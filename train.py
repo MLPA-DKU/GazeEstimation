@@ -1,4 +1,3 @@
-import numpy as np
 import torch.nn as nn
 import torch.utils.data as loader
 import torchvision.transforms as transforms
@@ -31,8 +30,8 @@ def main():
         transforms.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
     ])
 
-    trainset = datasets.Gaze360(root=root, train=True, transform=transform, mode='frame')
-    validset = datasets.Gaze360(root=root, train=False, transform=transform, mode='frame')
+    trainset = datasets.XGaze(root=root, train=True, transform=transform)
+    validset = datasets.XGaze(root=root, train=False, transform=transform)
     trainloader = loader.DataLoader(trainset, batch_size=batch_size, shuffle=True, num_workers=num_workers)
     validloader = loader.DataLoader(validset, batch_size=batch_size, shuffle=False, num_workers=num_workers)
 

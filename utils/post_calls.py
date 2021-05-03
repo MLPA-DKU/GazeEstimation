@@ -46,12 +46,3 @@ class CheckpointModule:
 
     def __call__(self):
         pass
-
-
-class IntegratedManagementModule:
-
-    def __init__(self):
-        pass
-
-    def __call__(self, *args, **kwargs):
-        pass
