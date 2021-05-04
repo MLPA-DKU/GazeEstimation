@@ -25,7 +25,7 @@ class NVIDIAGPUMEMInfo:
     def __smi__(self, query, encoding):
         res = subprocess.check_output(['nvidia-smi', query, '--format=csv,noheader'])
         res = res.decode().strip().split('\n')
-        res = {f'cuda:{x}': self.convert_to_bytes(y) if encoding == 'byte' else y for x, y in enumerate(res)}
+        res = {x: self.convert_to_bytes(y) if encoding == 'byte' else y for x, y in enumerate(res)}
         return res
 
     @staticmethod
@@ -43,18 +43,14 @@ class NVIDIAGPUMEMInfo:
 class DeviceAutoAllocator:
 
     def __init__(self):
-        self.device_info = NVIDIAGPUMEMInfo()
-        self.device_dict = self.device_info.nvidia_gpu_memory_usage
+        self.device_dict = NVIDIAGPUMEMInfo().nvidia_gpu_memory_usage
         self.device_dict_sorted = sorted(self.device_dict.items(), key=lambda item: item[1])
 
     def __call__(self, num_required=1):
         if torch.cuda.is_available():
-            if num_required == 1:
-                return self.device_dict_sorted[0][0]
-            elif num_required >= 1:
-                device_ids = self.device_dict_sorted[0:num_required]
-                device_ids = [int(device_id[0].split(':')[1]) for device_id in device_ids]
-                return device_ids
+            device = self.device_dict_sorted[0:num_required]
+            device = f'cuda:{device[0][0]}' if num_required == 1 else [d[0] for d in device]
+            return device
         else:
             return 'cpu'
 

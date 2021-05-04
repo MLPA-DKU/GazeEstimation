@@ -4,6 +4,12 @@ import torchvision.transforms as transforms
 import matplotlib.pyplot as plt
 
 
+def denorm(tensor, mean, std):
+    for t, m, s in zip(tensor, mean, std):
+        t.mul_(s).add_(m)
+    return tensor
+
+
 def visualize_gaze_direction_gaze360(tensor, gaze, prediction=None, save=None, length=200):
 
     # PyTorch image tensor shape: CHW
