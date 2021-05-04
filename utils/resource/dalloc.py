@@ -43,6 +43,8 @@ class NVIDIAGPUMEMInfo:
 
 class DeviceAutoAllocator:
 
+    # TODO: add param `required_minimum`
+
     def __init__(self):
         self.device_dict = NVIDIAGPUMEMInfo().nvidia_gpu_memory_usage
         self.device_dict_sorted = sorted(self.device_dict.items(), key=lambda item: item[1])
@@ -58,8 +60,30 @@ class DeviceAutoAllocator:
 
 
 def auto_device(parallel: Union[bool, int] = False):
-    alloc = DeviceAutoAllocator()
+    """Recommend GPU device with GPU memory usage.
+
+    Args:
+        parallel: setting number of GPUs to use when using multiple GPUs.
+            If False, only 1 GPU with the least GPU memory usage is selected.
+
+    Examples:
+        >>> # Allocate to 1 GPU
+        >>> device = auto_device(parallel=False)
+        >>> model = torch.nn.Module()
+        >>> model.to(device)
+        >>> # Allocate to 4 GPU with torch.nn.DataParallel
+        >>> device = auto_device(parallel=True)
+        >>> model = torch.nn.Module()
+        >>> model = torch.nn.DataParallel(model, device_ids=auto_device(parallel=4))
+        >>> model.to(device)
+        >>> # Allocate to every GPU with torch.nn.DataParallel
+        >>> device = auto_device(parallel=True)
+        >>> model = torch.nn.Module()
+        >>> model = torch.nn.DataParallel(model)
+        >>> model.to(device)
+    """
+    __alloc = DeviceAutoAllocator()
     if isinstance(parallel, bool):
-        return alloc(device_required=1)
+        return __alloc(device_required=1)
     elif isinstance(parallel, int):
-        return alloc(device_required=parallel)
+        return __alloc(device_required=parallel)
