@@ -7,9 +7,6 @@ import models
 import modules
 import utils
 
-utils.enable_easy_debug(False)
-utils.enable_reproducibility(False)
-
 # global settings
 device = utils.auto_device()
 epochs = 1000
@@ -30,8 +27,8 @@ def main():
         transforms.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
     ])
 
-    trainset = datasets.XGaze(root=root, train=True, transform=transform)
-    validset = datasets.XGaze(root=root, train=False, transform=transform)
+    trainset = datasets.Gaze360(root=root, train=True, transform=transform, mode='image')
+    validset = datasets.Gaze360(root=root, train=False, transform=transform, mode='image')
     trainloader = loader.DataLoader(trainset, batch_size=batch_size, shuffle=True, num_workers=num_workers)
     validloader = loader.DataLoader(validset, batch_size=batch_size, shuffle=False, num_workers=num_workers)
 
@@ -42,28 +39,36 @@ def main():
     criterion = nn.MSELoss()
     evaluator = modules.AngularError()
 
-    # TODO: replace with integrated callback module
+    r6 = ...
 
     for epoch in range(epochs):
-        train(trainloader, model, optimizer, criterion, evaluator)
-        valid(validloader, model, criterion, evaluator)
+        train(trainloader, model, optimizer, criterion, evaluator, r6)
+        valid(validloader, model, criterion, evaluator, r6)
+        r6.end_epoch()
 
 
-def train(dataloader, model, optimizer, criterion, evaluator):
+def train(dataloader, model, optimizer, criterion, evaluator, r6):
 
     model.train()
+    r6.train()
     for idx, batch in enumerate(dataloader):
         _, targets, outputs, loss = modules.update(batch, model, optimizer, criterion, device=device)
         score = evaluator(outputs, targets)
-    utils.salvage_memory()
+        r6.add_metric('loss', loss)
+        r6.add_metric('angular error', score)
+        r6.end_batch_summary()
 
 
-def valid(dataloader, model, criterion, evaluator):
+def valid(dataloader, model, criterion, evaluator, r6):
 
     model.eval()
+    r6.eval()
     for idx, batch in enumerate(dataloader):
         loss, score = modules.evaluate(batch, model, criterion, evaluator, device=device)
-    utils.salvage_memory()
+        r6.add_metric('loss', loss)
+        r6.add_metric('angular error', score)
+        r6.end_batch_summary()
+    r6.end_epoch_summary()
 
 
 if __name__ == '__main__':

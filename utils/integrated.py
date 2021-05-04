@@ -55,10 +55,10 @@ class R6Tensorboard(R6DB):
 
 class R6EarlyStopping:
 
-    def __init__(self, monitor=None, patience=0, delta=0):
+    def __init__(self, monitor=None, patience=0, delta=None):
         self.monitor = monitor
         self.patience = patience
-        self.delta = delta
+        self.delta = delta if delta is not None else 0
 
         self.best_score = np.inf
         self.counter = 1
@@ -66,12 +66,8 @@ class R6EarlyStopping:
     def __call__(self):
         if self.counter == self.patience:
             quit()
-        self.counter = 1 if self.__discriminator__() else self.counter + 1
-
-    def __discriminator__(self):
-        is_best = True if self.monitor < self.best_score - self.delta else False
+        self.counter = 1 if self.monitor < self.best_score - self.delta else self.counter + 1
         self.best_score = min(self.monitor, self.best_score - self.delta)
-        return is_best
 
 
 class R6MetricHandler:
@@ -165,15 +161,3 @@ def print_result_on_epoch_end(epoch, epochs, scores):
     print(f'\n[ RES ] Epoch[{epoch + 1:>{len(str(epochs))}}/{epochs}] - '
           f'angular error [{np.nanmean(scores):.3f}|{np.nanstd(scores):.3f}|'
           f'{np.min(scores):.3f}|{np.max(scores):.3f}:MEAN|STD|MIN|MAX]')
-
-
-if __name__ == '__main__':
-    manager = R6IX(1000, 1000, 100)
-    batch_manager = R6BatchManager(manager)
-    batch_manager.add_metric('loss')
-    batch_manager.update('loss', 0.5)
-    printer = R6Printer(manager, batch_manager)
-    printer.display()
-    print()
-    manager.eval()
-    printer.display()

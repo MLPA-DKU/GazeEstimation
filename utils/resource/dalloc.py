@@ -1,3 +1,4 @@
+from typing import Union
 import os
 import subprocess
 import warnings
@@ -46,15 +47,19 @@ class DeviceAutoAllocator:
         self.device_dict = NVIDIAGPUMEMInfo().nvidia_gpu_memory_usage
         self.device_dict_sorted = sorted(self.device_dict.items(), key=lambda item: item[1])
 
-    def __call__(self, num_required=1):
+    def __call__(self, device_required=1):
+        assert device_required <= len(self.device_dict_sorted), 'You are trying to allocate GPUs more than you have.'
         if torch.cuda.is_available():
-            device = self.device_dict_sorted[0:num_required]
-            device = f'cuda:{device[0][0]}' if num_required == 1 else [d[0] for d in device]
+            device = self.device_dict_sorted[0:device_required]
+            device = f'cuda:{device[0][0]}' if device_required == 1 else [d[0] for d in device]
             return device
         else:
             return 'cpu'
 
 
-def auto_device(num_required=1):
+def auto_device(parallel: Union[bool, int] = False):
     alloc = DeviceAutoAllocator()
-    return alloc(num_required=num_required)
+    if isinstance(parallel, bool):
+        return alloc(device_required=1)
+    elif isinstance(parallel, int):
+        return alloc(device_required=parallel)
