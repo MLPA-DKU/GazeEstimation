@@ -27,8 +27,8 @@ def main():
         transforms.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
     ])
 
-    trainset = datasets.Gaze360(root=root, train=True, transform=transform, mode='image')
-    validset = datasets.Gaze360(root=root, train=False, transform=transform, mode='image')
+    trainset = datasets.Gaze360(root=root, train=True, transform=transform, mode='frame')
+    validset = datasets.Gaze360(root=root, train=False, transform=transform, mode='frame')
     trainloader = loader.DataLoader(trainset, batch_size=batch_size, shuffle=True, num_workers=num_workers)
     validloader = loader.DataLoader(validset, batch_size=batch_size, shuffle=False, num_workers=num_workers)
 
@@ -44,7 +44,6 @@ def main():
     for epoch in range(epochs):
         train(trainloader, model, optimizer, criterion, evaluator, r6)
         valid(validloader, model, criterion, evaluator, r6)
-        r6.end_epoch()
 
 
 def train(dataloader, model, optimizer, criterion, evaluator, r6):
@@ -57,6 +56,7 @@ def train(dataloader, model, optimizer, criterion, evaluator, r6):
         r6.add_metric('loss', loss)
         r6.add_metric('angular error', score)
         r6.end_batch_summary()
+    r6.end_epoch()
 
 
 def valid(dataloader, model, criterion, evaluator, r6):
@@ -69,6 +69,7 @@ def valid(dataloader, model, criterion, evaluator, r6):
         r6.add_metric('angular error', score)
         r6.end_batch_summary()
     r6.end_epoch_summary()
+    r6.end_epoch()
 
 
 if __name__ == '__main__':
