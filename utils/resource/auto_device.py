@@ -1,42 +1,64 @@
+import os
 import subprocess
+import warnings
 
-import numpy as np
 import torch.cuda
 
 
-def nvidia_smi():
-    # if 'CUDA_DEVICE_ORDER' not in os.environ or 'PCI_BUS_ID' != os.environ['CUDA_DEVICE_ORDER']:
-    #     warnings.warn('It`s recommended to set ``CUDA_DEVICE_ORDER`` to be ``PCI_BUS_ID`` '
-    #                   'by ``export CUDA_DEVICE_ORDER=PCI_BUS_ID``; '
-    #                   'Otherwise, it`s not guaranteed that the GPU index from PyTorch '
-    #                   'to be consistent the ``nvidia-smi`` results.')
-    res = subprocess.check_output(['nvidia-smi', '--query-gpu=memory.used', '--format=csv,noheader'])
-    res = res.decode().strip().split('\n')
-    res = {f'cuda:{x}': y for x, y in enumerate(res)}
-    return res
+class NVIDIAGPUMEMInfo:
+
+    def __init__(self, verbose=0, encoding='byte'):
+        self.verbose = verbose
+        self.__env__()
+        self.nvidia_gpu_memory_total = self.__smi__(query='--query-gpu=memory.total', encoding=encoding)
+        self.nvidia_gpu_memory_usage = self.__smi__(query='--query-gpu=memory.used', encoding=encoding)
+
+    def __env__(self):
+        if self.verbose >= 1:
+            if 'CUDA_DEVICE_ORDER' not in os.environ or 'PCI_BUS_ID' != os.environ['CUDA_DEVICE_ORDER']:
+                warn = 'It`s recommended to set ``CUDA_DEVICE_ORDER`` to be ``PCI_BUS_ID`` ' \
+                       'by ``export CUDA_DEVICE_ORDER=PCI_BUS_ID``; ' \
+                       'Otherwise, it`s not guaranteed that the GPU index from PyTorch ' \
+                       'to be consistent the ``nvidia-smi`` results.'
+                warnings.warn(warn)
+
+    def __smi__(self, query, encoding):
+        res = subprocess.check_output(['nvidia-smi', query, '--format=csv,noheader'])
+        res = res.decode().strip().split('\n')
+        res = {f'cuda:{x}': self.convert_to_bytes(y) if encoding == 'byte' else y for x, y in enumerate(res)}
+        return res
+
+    @staticmethod
+    def convert_to_bytes(memory_size):
+        size, suffix = memory_size.split(' ')
+        size = int(size)
+        lookup = {
+            'KB': size << 10, 'KiB': size << 10,
+            'MB': size << 20, 'MiB': size << 20,
+            'GB': size << 30, 'GiB': size << 30,
+        }
+        return lookup[suffix]
 
 
-def convert_to_bytes(memory_size):
-    size, suffix = memory_size.split(' ')
-    size = int(size)
-    lookup = {
-        'KB': size << 10, 'KiB': size << 10,
-        'MB': size << 20, 'MiB': size << 20,
-        'GB': size << 30, 'GiB': size << 30,
-    }
-    return lookup[suffix]
+class DeviceAutoAllocator:
+
+    def __init__(self):
+        self.device_info = NVIDIAGPUMEMInfo()
+        self.device_dict = self.device_info.nvidia_gpu_memory_usage
+        self.device_dict_sorted = sorted(self.device_dict.items(), key=lambda item: item[1])
+
+    def __call__(self, num_required=1):
+        if torch.cuda.is_available():
+            if num_required == 1:
+                return self.device_dict_sorted[0][0]
+            elif num_required >= 1:
+                device_ids = self.device_dict_sorted[0:num_required]
+                device_ids = [int(device_id[0].split(':')[1]) for device_id in device_ids]
+                return device_ids
+        else:
+            return 'cpu'
 
 
-def auto_device():
-    if torch.cuda.is_available():
-        device = None
-        device_info = nvidia_smi()
-        device_least_used = np.inf
-        for device_id, device_usage in device_info.items():
-            device_usage = convert_to_bytes(device_usage)
-            if device_usage < device_least_used:
-                device = device_id
-                device_least_used = min(device_usage, device_least_used)
-        return device
-    else:
-        return 'cpu'
+def auto_device(num_required=1):
+    alloc = DeviceAutoAllocator()
+    return alloc(num_required=num_required)

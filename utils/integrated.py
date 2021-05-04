@@ -19,6 +19,7 @@ class R6DB:
         self.machine = socket.gethostname()
 
 
+# TODO: PyTorch Integrated Checkpoint Module - Inspired by CheckFreq from Microsoft Project Fiddle
 class R6Checkpoint(R6DB):
 
     def __init__(self, obj, f, uniq=None):
