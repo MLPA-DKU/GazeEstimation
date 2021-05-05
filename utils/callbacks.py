@@ -13,10 +13,22 @@ class R6SessionManager:
     uniq = str(uuid.uuid4()).split('-')[0]
 
     def __init__(self, model, optimizer, f, patience=30):
-        self.score_board = []
+        self.epoch = 0
+        self.epoch_score_board = []
+        self.batch_score_board = []
         self.checkpoint_module = R6Checkpoint(model, optimizer, f, self.uniq)
         self.tensorboard_module = R6Tensorboard(f, self.uniq)
-        self.early_stopping_module = R6EarlyStopping(self.score_board[-1], patience)
+        self.writer = self.tensorboard_module.writer
+        self.early_stopping_module = R6EarlyStopping(self.epoch_score_board[-1], patience)
+
+    def end_epoch(self):
+        self.epoch += 1
+        self.epoch_score_board.append(np.nanmean(self.batch_score_board))
+        self.early_stopping_module()
+        self.checkpoint_module.save(suffix=f'epoch.{self.epoch}.score.{np.nanmean(self.batch_score_board):.3f}')
+        if self.early_stopping_module.is_best:
+            self.checkpoint_module.save(suffix=f'score.best')
+        self.batch_score_board = []
 
 
 class R6FolderManager:
@@ -79,9 +91,12 @@ class R6EarlyStopping:
 
         self.best_score = np.inf
         self.counter = 1
+        self.is_best = False
 
     def __call__(self):
         if self.counter == self.patience:
             quit()
-        self.counter = 1 if self.monitor < self.best_score - self.delta else self.counter + 1
+
+        self.is_best = self.monitor < self.best_score - self.delta
+        self.counter = 1 if self.is_best else self.counter + 1
         self.best_score = min(self.monitor, self.best_score - self.delta)

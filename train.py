@@ -1,3 +1,4 @@
+import numpy as np
 import torch.nn as nn
 import torch.utils.data as loader
 import torchvision.transforms as transforms
@@ -13,6 +14,7 @@ epochs = 1000
 
 # dataset option
 root = '/mnt/datasets/Gaze/Gaze360'
+save = '/mnt/saves/Gaze'
 
 # dataloader option
 batch_size = 64
@@ -20,6 +22,8 @@ num_workers = 16
 
 
 def main():
+
+    print('\rInitializing...', end='')
 
     transform = transforms.Compose([
         transforms.ToTensor(),
@@ -39,7 +43,9 @@ def main():
     criterion = nn.MSELoss()
     evaluator = modules.AngularError()
 
-    r6 = ...
+    r6 = utils.R6SessionManager(model, optimizer, f=save)
+
+    print('\rInitialization Complete.')
 
     for epoch in range(epochs):
         train(trainloader, model, optimizer, criterion, evaluator, r6)
@@ -48,28 +54,37 @@ def main():
 
 def train(dataloader, model, optimizer, criterion, evaluator, r6):
 
+    print(f'\rEpoch {r6.epoch} Training Session Started.', end='')
+
     model.train()
-    r6.train()
+    scores = []
     for idx, batch in enumerate(dataloader):
         _, targets, outputs, loss = modules.update(batch, model, optimizer, criterion, device=device)
         score = evaluator(outputs, targets)
-        r6.add_metric('loss', loss)
-        r6.add_metric('angular error', score)
-        r6.end_batch_summary()
-    r6.end_epoch()
+        scores.append(score.item())
+        r6.writer.add_scalar('training loss', loss.item(), global_step=r6.epoch * len(dataloader) + idx)
+        r6.writer.add_scalar('angular error', score.item(), global_step=r6.epoch * len(dataloader) + idx)
+        print(f'\rEpoch {r6.epoch} Training Session Proceeding: {idx + 1}/{len(dataloader)}', end='')
+    r6.writer.add_scalar('training angular error / epoch', np.nanmean(scores), global_step=r6.epoch)
 
 
 def valid(dataloader, model, criterion, evaluator, r6):
 
+    print(f'\rEpoch {r6.epoch} Validation Session Started.', end='')
+
     model.eval()
-    r6.eval()
+    scores = []
     for idx, batch in enumerate(dataloader):
         loss, score = modules.evaluate(batch, model, criterion, evaluator, device=device)
-        r6.add_metric('loss', loss)
-        r6.add_metric('angular error', score)
-        r6.end_batch_summary()
-    r6.end_epoch_summary()
+        scores.append(score)
+        r6.writer.add_scalar('validation loss', loss.item(), global_step=r6.epoch * len(dataloader) + idx)
+        r6.writer.add_scalar('angular error', score.item(), global_step=r6.epoch * len(dataloader) + idx)
+        r6.batch_score_board.append(loss.item())
+        print(f'\rEpoch {r6.epoch} Validation Session Proceeding: {idx + 1}/{len(dataloader)}', end='')
+    r6.writer.add_scalar('validation angular error / epoch', np.nanmean(scores), global_step=r6.epoch)
     r6.end_epoch()
+
+    print(f'\rEpoch {r6.epoch} Complete.')
 
 
 if __name__ == '__main__':
