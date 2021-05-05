@@ -63,7 +63,7 @@ def train(dataloader, model, optimizer, criterion, evaluator, r6):
         score = evaluator(outputs, targets)
         scores.append(score.item())
         r6.writer.add_scalar('training loss', loss.item(), global_step=r6.epoch * len(dataloader) + idx)
-        r6.writer.add_scalar('angular error', score.item(), global_step=r6.epoch * len(dataloader) + idx)
+        r6.writer.add_scalar('train angular error', score.item(), global_step=r6.epoch * len(dataloader) + idx)
         print(f'\rEpoch {r6.epoch} Training Session Proceeding: {idx + 1}/{len(dataloader)}', end='')
     r6.writer.add_scalar('training angular error / epoch', np.nanmean(scores), global_step=r6.epoch)
 
@@ -78,7 +78,7 @@ def valid(dataloader, model, criterion, evaluator, r6):
         loss, score = modules.evaluate(batch, model, criterion, evaluator, device=device)
         scores.append(score)
         r6.writer.add_scalar('validation loss', loss.item(), global_step=r6.epoch * len(dataloader) + idx)
-        r6.writer.add_scalar('angular error', score.item(), global_step=r6.epoch * len(dataloader) + idx)
+        r6.writer.add_scalar('validation angular error', score.item(), global_step=r6.epoch * len(dataloader) + idx)
         r6.batch_score_board.append(loss.item())
         print(f'\rEpoch {r6.epoch} Validation Session Proceeding: {idx + 1}/{len(dataloader)}', end='')
     r6.writer.add_scalar('validation angular error / epoch', np.nanmean(scores), global_step=r6.epoch)

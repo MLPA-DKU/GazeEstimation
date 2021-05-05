@@ -19,7 +19,7 @@ class R6SessionManager:
         self.checkpoint_module = R6Checkpoint(model, optimizer, f, self.uniq)
         self.tensorboard_module = R6Tensorboard(f, self.uniq)
         self.writer = self.tensorboard_module.writer
-        self.early_stopping_module = R6EarlyStopping(self.epoch_score_board[-1], patience)
+        self.early_stopping_module = R6EarlyStopping(self.epoch_score_board, patience)
 
     def end_epoch(self):
         self.epoch += 1
@@ -97,6 +97,6 @@ class R6EarlyStopping:
         if self.counter == self.patience:
             quit()
 
-        self.is_best = self.monitor < self.best_score - self.delta
+        self.is_best = self.monitor[-1] < self.best_score - self.delta
         self.counter = 1 if self.is_best else self.counter + 1
-        self.best_score = min(self.monitor, self.best_score - self.delta)
+        self.best_score = min(self.monitor[-1], self.best_score - self.delta)
