@@ -43,7 +43,7 @@ def main():
     criterion = nn.MSELoss()
     evaluator = modules.AngularError()
 
-    r6 = utils.R6SessionManager(model, optimizer, f=save)
+    r6 = utils.R6SessionManager(model, f=save)
 
     print('\rInitialization Complete.')
 
@@ -76,15 +76,14 @@ def valid(dataloader, model, criterion, evaluator, r6):
     scores = []
     for idx, batch in enumerate(dataloader):
         loss, score = modules.evaluate(batch, model, criterion, evaluator, device=device)
-        scores.append(score)
+        scores.append(score.item())
         r6.writer.add_scalar('validation loss', loss.item(), global_step=r6.epoch * len(dataloader) + idx)
         r6.writer.add_scalar('validation angular error', score.item(), global_step=r6.epoch * len(dataloader) + idx)
         r6.batch_score_board.append(loss.item())
         print(f'\rEpoch {r6.epoch} Validation Session Proceeding: {idx + 1}/{len(dataloader)}', end='')
     r6.writer.add_scalar('validation angular error / epoch', np.nanmean(scores), global_step=r6.epoch)
-    r6.end_epoch()
-
     print(f'\rEpoch {r6.epoch} Complete.')
+    r6.end_epoch()
 
 
 if __name__ == '__main__':

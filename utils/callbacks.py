@@ -12,11 +12,11 @@ class R6SessionManager:
 
     uniq = str(uuid.uuid4()).split('-')[0]
 
-    def __init__(self, model, optimizer, f, patience=30):
+    def __init__(self, model, f, patience=30):
         self.epoch = 0
         self.epoch_score_board = []
         self.batch_score_board = []
-        self.checkpoint_module = R6Checkpoint(model, optimizer, f, self.uniq)
+        self.checkpoint_module = R6Checkpoint(model, f, self.uniq)
         self.tensorboard_module = R6Tensorboard(f, self.uniq)
         self.writer = self.tensorboard_module.writer
         self.early_stopping_module = R6EarlyStopping(self.epoch_score_board, patience)
@@ -47,11 +47,11 @@ class R6Checkpoint(R6FolderManager):
 
     # TODO: PyTorch Integrated Checkpoint Module - Inspired by CheckFreq from Microsoft Project Fiddle
 
-    def __init__(self, model, optimizer, f, uniq, **kwargs):
+    def __init__(self, model, f, uniq, **kwargs):
         self.base_folder = 'checkpoint'
         super(R6Checkpoint, self).__init__(f=f, uniq=uniq)
 
-        self.obj = {'model': model, 'optimizer': optimizer}
+        self.obj = {'model': model}
         self.obj.update(**kwargs)
         self.obj = {k: v for k, v in sorted(self.obj.items())}
 
