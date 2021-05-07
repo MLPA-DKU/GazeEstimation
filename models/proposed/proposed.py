@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torchvision.models as models
 
-from models.common.pyramids import BiFPN
+from models.common.pyramids import BiFPN, SEBiFPN
 
 
 class EEGE(nn.Module):
@@ -48,10 +48,8 @@ class EEGE(nn.Module):
         return predictions
 
 
-if __name__ == '__main__':
+class SEEEGE(EEGE):
 
-    model = EEGE()
-    inputs = torch.rand((1, 3, 224, 224))
-    outputs = model(inputs)
-
-    breakpoint()
+    def __init__(self, num_classes=2):
+        super(SEEEGE, self).__init__(num_classes=num_classes)
+        self.fpn = nn.Sequential(*[SEBiFPN(64) for _ in range(2)])

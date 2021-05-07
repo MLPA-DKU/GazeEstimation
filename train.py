@@ -36,14 +36,14 @@ def main():
     trainloader = loader.DataLoader(trainset, batch_size=batch_size, shuffle=True, num_workers=num_workers)
     validloader = loader.DataLoader(validset, batch_size=batch_size, shuffle=False, num_workers=num_workers)
 
-    model = models.EEGE()
+    model = models.SEEEGE()
     model.to(device)
 
     optimizer = modules.Lookahead(modules.RAdam(model.parameters()))
     criterion = nn.MSELoss()
     evaluator = modules.AngularError()
 
-    r6 = utils.R6SessionManager(model, f=save)
+    r6 = utils.R6SessionManager(model, f=save, patience=100)
 
     print('\rInitialization Complete.')
 
