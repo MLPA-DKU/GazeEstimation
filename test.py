@@ -37,7 +37,7 @@ def main():
     testset = datasets.Gaze360Inference(root=root, transform=transform, mode='frame')
     testloader = loader.DataLoader(testset, batch_size=batch_size, shuffle=False, num_workers=num_workers)
 
-    model = torch.load(os.path.join(save, 'checkpoint', 'checkpoint.27255e69', 'checkpoint.R6.27255e69.score.best.pth'))
+    model = torch.load(os.path.join(save, 'checkpoint', 'checkpoint.872495e0', 'checkpoint.R6.872495e0.score.best.pth'))
     model = model['model']
     model.to(device)
 
@@ -59,7 +59,7 @@ def test(dataloader, model, criterion, evaluator):
         losses.append(loss.item())
         scores.append(score.item())
         print(f'\rTest Session Proceeding: {idx + 1}/{len(dataloader)}', end='')
-    print(f'Summary Report')
+    print(f'\nSummary Report')
     print(f'Test Loss')
     print(f'Mean: {np.nanmean(losses):.3f} | Std: {np.nanstd(losses):.3f} | Min: {np.nanmin(losses):.3f} | Max: {np.nanmax(losses):.3f}')
     print(f'Test Angular Error')

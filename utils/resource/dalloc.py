@@ -60,23 +60,23 @@ class DeviceAutoAllocator:
 
 
 def auto_device(parallel: Union[bool, int] = False):
-    """Recommend GPU device by GPU memory usage.
+    """Recommend GPU device by memory usage of each GPUs in the machine.
 
     Args:
         parallel: setting number of GPUs to use when using torch.nn.DataParallel.
             If False, only 1 GPU with the least GPU memory usage is selected.
 
     Examples:
-        >>> # Allocate to 1 GPU
+        >>> # Allocates to 1 GPU
         >>> device = auto_device(parallel=False)
         >>> model = torch.nn.Module()
         >>> model.to(device)
-        >>> # Allocate to 4 GPU with torch.nn.DataParallel
+        >>> # Allocates to 4 GPU with torch.nn.DataParallel
         >>> device = auto_device(parallel=True)
         >>> model = torch.nn.Module()
         >>> model = torch.nn.DataParallel(model, device_ids=auto_device(parallel=4))
         >>> model.to(device)
-        >>> # Allocate to every GPU with torch.nn.DataParallel
+        >>> # Allocates to every GPU with torch.nn.DataParallel
         >>> device = auto_device(parallel=True)
         >>> model = torch.nn.Module()
         >>> model = torch.nn.DataParallel(model)
