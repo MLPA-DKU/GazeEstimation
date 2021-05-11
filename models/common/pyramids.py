@@ -98,32 +98,32 @@ class SEBiFPN(nn.Module):
         self.relu = nn.ReLU()
 
         # se and bottleneck blocks
-        self.se_bot_3 = nn.Sequential(SEBlock(in_channels), nn.Conv2d(in_channels, 3, kernel_size=1, stride=1))
-        self.se_bot_4 = nn.Sequential(SEBlock(in_channels), nn.Conv2d(in_channels, 3, kernel_size=1, stride=1))
-        self.se_bot_5 = nn.Sequential(SEBlock(in_channels), nn.Conv2d(in_channels, 3, kernel_size=1, stride=1))
-        self.se_bot_6 = nn.Sequential(SEBlock(in_channels), nn.Conv2d(in_channels, 3, kernel_size=1, stride=1))
-        self.se_bot_7 = nn.Sequential(SEBlock(in_channels), nn.Conv2d(in_channels, 3, kernel_size=1, stride=1))
+        self.se_bot_3 = nn.Sequential(SEBlock(in_channels), nn.Conv2d(in_channels, 16, kernel_size=1, stride=1))
+        self.se_bot_4 = nn.Sequential(SEBlock(in_channels), nn.Conv2d(in_channels, 16, kernel_size=1, stride=1))
+        self.se_bot_5 = nn.Sequential(SEBlock(in_channels), nn.Conv2d(in_channels, 16, kernel_size=1, stride=1))
+        self.se_bot_6 = nn.Sequential(SEBlock(in_channels), nn.Conv2d(in_channels, 16, kernel_size=1, stride=1))
+        self.se_bot_7 = nn.Sequential(SEBlock(in_channels), nn.Conv2d(in_channels, 16, kernel_size=1, stride=1))
 
         # expansion
-        self.expand_3 = nn.Conv2d(3, in_channels, kernel_size=1, stride=1)
-        self.expand_4 = nn.Conv2d(3, in_channels, kernel_size=1, stride=1)
-        self.expand_5 = nn.Conv2d(3, in_channels, kernel_size=1, stride=1)
-        self.expand_6 = nn.Conv2d(3, in_channels, kernel_size=1, stride=1)
-        self.expand_7 = nn.Conv2d(3, in_channels, kernel_size=1, stride=1)
+        self.expand_3 = nn.Conv2d(16, in_channels, kernel_size=1, stride=1)
+        self.expand_4 = nn.Conv2d(16, in_channels, kernel_size=1, stride=1)
+        self.expand_5 = nn.Conv2d(16, in_channels, kernel_size=1, stride=1)
+        self.expand_6 = nn.Conv2d(16, in_channels, kernel_size=1, stride=1)
+        self.expand_7 = nn.Conv2d(16, in_channels, kernel_size=1, stride=1)
 
         # resize
         self.upsample = nn.Upsample(scale_factor=2)
         self.dnsample = nn.MaxPool2d(kernel_size=2)
 
         # conv layers
-        self.conv_p6_1 = DSConvBlock(3)
-        self.conv_p5_1 = DSConvBlock(3)
-        self.conv_p4_1 = DSConvBlock(3)
-        self.conv_p7_2 = DSConvBlock(3)
-        self.conv_p6_2 = DSConvBlock(3)
-        self.conv_p5_2 = DSConvBlock(3)
-        self.conv_p4_2 = DSConvBlock(3)
-        self.conv_p3_2 = DSConvBlock(3)
+        self.conv_p6_1 = DSConvBlock(16)
+        self.conv_p5_1 = DSConvBlock(16)
+        self.conv_p4_1 = DSConvBlock(16)
+        self.conv_p7_2 = DSConvBlock(16)
+        self.conv_p6_2 = DSConvBlock(16)
+        self.conv_p5_2 = DSConvBlock(16)
+        self.conv_p4_2 = DSConvBlock(16)
+        self.conv_p3_2 = DSConvBlock(16)
 
         # weights
         self.w_p6_1 = nn.Parameter(torch.ones(2))

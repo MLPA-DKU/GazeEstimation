@@ -12,9 +12,9 @@ from torchvision.datasets import VisionDataset
 class Gaze360(VisionDataset):
 
     base_folder = 'imgs'
-    train_list = list(open('datasets/gaze360/train.txt', 'r'))
-    valid_list = list(open('datasets/gaze360/validation.txt', 'r'))
-    infer_list = list(open('datasets/gaze360/test.txt', 'r'))
+    train_list = list(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'train.txt'), 'r'))
+    valid_list = list(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'validation.txt'), 'r'))
+    infer_list = list(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'test.txt'), 'r'))
 
     def __init__(self, root, train=True, transform=None, target_transform=None, mode=None):
         super(Gaze360, self).__init__(root, transform=transform, target_transform=target_transform)

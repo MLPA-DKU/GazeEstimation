@@ -45,8 +45,6 @@ class R6FolderManager:
 
 class R6Checkpoint(R6FolderManager):
 
-    # TODO: PyTorch Integrated Checkpoint Module - Inspired by CheckFreq from Microsoft Project Fiddle
-
     def __init__(self, model, f, uniq, **kwargs):
         self.base_folder = 'checkpoint'
         super(R6Checkpoint, self).__init__(f=f, uniq=uniq)
