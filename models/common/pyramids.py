@@ -90,12 +90,8 @@ class SESABiFPN(nn.Module):
         SEBlock ---> P3_0 -------------------------- P3_2 ---> 1x1Conv --->
     """
 
-    def __init__(self, in_channels, bottleneck=3, epsilon=1e-4):
+    def __init__(self, in_channels, bottleneck=3):
         super(SESABiFPN, self).__init__()
-
-        # common
-        self.epsilon = epsilon
-        self.relu = nn.ReLU()
 
         # se and bottleneck blocks
         self.se_bot_3 = nn.Sequential(SEBlock(in_channels), nn.Conv2d(in_channels, bottleneck, kernel_size=1, stride=1))
