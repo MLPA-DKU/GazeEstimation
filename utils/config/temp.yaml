@@ -1,8 +1,6 @@
 experiment:
   name: ResNet50+FPN64
   args:
-    easy_debug: false
-    reproducibility: false
     epoch: 1000
     device: 'auto'
 dataset:

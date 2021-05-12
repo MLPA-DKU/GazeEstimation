@@ -1,6 +1,3 @@
-import os
-import pathlib
-from typing import Union
 import yaml
 
 import utils
@@ -8,7 +5,7 @@ import utils
 
 class ConfigurationManager:
 
-    def __init__(self, config: Union[str, pathlib.Path, os.PathLike]):
+    def __init__(self, config):
         self.config = self.config_parser(config)
         self.device = self.config['experiment']['args']['device']
         self.device = utils.auto_device() if self.device == 'auto' else self.device
@@ -23,7 +20,7 @@ class ConfigurationManager:
     def __materialize__(config, name, module, *args, **kwargs):
         config_args = config[name]['args']
         config_args = dict(config_args) if config_args is not None else dict()
-        assert all([k not in config_args for k in kwargs]), 'configuration takes precedence. overwriting isn`t allowed.'
+        assert all([k not in config_args for k in kwargs]), 'configuration file takes precedence. overwriting isn`t allowed.'
         config_args.update(kwargs)
         return getattr(module, config[name]['name'])(*args, **config_args)
 

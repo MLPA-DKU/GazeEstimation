@@ -1,3 +1,3 @@
-from .proposed import EEGE, SEEEGE
+from .proposed import EEGE, SESAEEGE
 
-__all__ = ['EEGE', 'SEEEGE']
+__all__ = ['EEGE', 'SESAEEGE']

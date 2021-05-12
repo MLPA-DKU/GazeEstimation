@@ -7,7 +7,6 @@ import torch.utils.data as loader
 import torchvision.transforms as transforms
 
 import datasets
-import models
 import modules
 import utils
 
