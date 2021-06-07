@@ -1,3 +1,4 @@
+import collections
 from typing import Union
 import os
 import os.path
@@ -29,6 +30,26 @@ class R6SessionManager:
         if self.early_stopping_module.is_best:
             self.checkpoint_module.save(suffix=f'score.best')
         self.batch_score_board = []
+
+
+class R6EarlyStopping:
+
+    def __init__(self, monitor=None, patience=0, delta=None):
+        self.monitor = monitor
+        self.patience = patience
+        self.delta = delta if delta is not None else 0
+
+        self.best_score = np.inf
+        self.counter = 1
+        self.is_best = False
+
+    def __call__(self):
+        if self.counter == self.patience:
+            quit()
+
+        self.is_best = self.monitor[-1] < self.best_score - self.delta
+        self.counter = 1 if self.is_best else self.counter + 1
+        self.best_score = min(self.monitor[-1], self.best_score - self.delta)
 
 
 class R6FolderManager:
@@ -79,22 +100,3 @@ class R6Tensorboard(R6FolderManager):
 
         self.writer = torch.utils.tensorboard.SummaryWriter(log_dir=self.f)
 
-
-class R6EarlyStopping:
-
-    def __init__(self, monitor=None, patience=0, delta=None):
-        self.monitor = monitor
-        self.patience = patience
-        self.delta = delta if delta is not None else 0
-
-        self.best_score = np.inf
-        self.counter = 1
-        self.is_best = False
-
-    def __call__(self):
-        if self.counter == self.patience:
-            quit()
-
-        self.is_best = self.monitor[-1] < self.best_score - self.delta
-        self.counter = 1 if self.is_best else self.counter + 1
-        self.best_score = min(self.monitor[-1], self.best_score - self.delta)

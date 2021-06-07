@@ -20,12 +20,3 @@ class CheckpointModule:
 
     def save(self):
         self.__save__()
-
-
-class CheckpointBlueprint:
-
-    def __init__(self):
-        pass
-
-    def __call__(self, *args, **kwargs):
-        return ...
