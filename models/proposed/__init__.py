@@ -1,3 +1,3 @@
-from .proposed import EEGE, SESAEEGE
+from .transformer import XiT
 
-__all__ = ['EEGE', 'SESAEEGE']
+__all__ = ['XiT']

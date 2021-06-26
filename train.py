@@ -17,7 +17,7 @@ root = '/mnt/datasets/Gaze/Gaze360'
 save = '/mnt/saves/Gaze'
 
 # dataloader option
-batch_size = 1
+batch_size = 32
 num_workers = 16
 
 
@@ -36,7 +36,7 @@ def main():
     trainloader = loader.DataLoader(trainset, batch_size=batch_size, shuffle=True, num_workers=num_workers)
     validloader = loader.DataLoader(validset, batch_size=batch_size, shuffle=False, num_workers=num_workers)
 
-    model = models.SESAEEGE()
+    model = models.XiT([64, 64, 64, 128, 128, 256, 256], depth=6)
     model.to(device)
 
     optimizer = modules.Lookahead(modules.RAdam(model.parameters()))
