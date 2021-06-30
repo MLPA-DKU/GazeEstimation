@@ -106,12 +106,3 @@ class XiT(nn.Module):
         x = torch.flatten(self.pool(x), 1)
         x = self.fc(x)
         return x
-
-
-# if __name__ == '__main__':
-#     device = 'cuda:0'
-#     t = torch.rand((1, 3, 224, 224), device=device)
-#     model = XiT([64, 64, 64, 128, 128, 256, 256], depth=6, heads=8)
-#     model.to(device=device)
-#     predict = model(t)
-#     breakpoint()
