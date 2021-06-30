@@ -1,27 +1,12 @@
-import numpy as np
 import torch.nn as nn
 import torch.utils.data as loader
 import torchvision.transforms as transforms
 
 import datasets
 import models
-import modules
-import utils
-
-# global settings
-device = utils.auto_device()
-epochs = 1000
-
-# dataset option
-root = '/mnt/datasets/Gaze/Gaze360'
-save = '/mnt/saves/Gaze'
-
-# dataloader option
-batch_size = 32
-num_workers = 16
 
 
-def main():
+def main(config):
 
     print('\rInitializing...', end='')
 
@@ -36,12 +21,11 @@ def main():
     trainloader = loader.DataLoader(trainset, batch_size=batch_size, shuffle=True, num_workers=num_workers)
     validloader = loader.DataLoader(validset, batch_size=batch_size, shuffle=False, num_workers=num_workers)
 
-    model = models.XiT([64, 64, 64, 128, 128, 256, 256], depth=6)
-    model.to(device)
+    model = ...
 
-    optimizer = modules.Lookahead(modules.RAdam(model.parameters()))
+    optimizer = ...
     criterion = nn.MSELoss()
-    evaluator = modules.AngularError()
+    evaluator = ...
 
 
 if __name__ == '__main__':

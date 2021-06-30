@@ -4,12 +4,6 @@ import torch
 import torch.backends.cudnn
 
 
-def denorm(tensor, mean, std):
-    for t, m, s in zip(tensor, mean, std):
-        t.mul_(s).add_(m)
-    return tensor
-
-
 def enable_easy_debug(enable=False):
     torch.autograd.set_detect_anomaly(enable)
 
