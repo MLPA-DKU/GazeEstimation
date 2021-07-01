@@ -1,27 +1,6 @@
 import yaml
 
 
-class StreamHandler:
-
-    pass
-
-
-class TensorboardHandler:
-
-    pass
-
-
-class EarlyStoppingHandler:
-
-    pass
-
-
-
-class ConfigLoader:
-
-    pass
-
-
 def parse_config(f):
     with open(f) as f:
         config = yaml.load(f, Loader=yaml.FullLoader)
@@ -43,3 +22,19 @@ def initializer(config, name, module, *args, **kwargs):
     assert all([k not in module_args for k in kwargs]), 'config file takes precedence. overwriting is not allowed.'
     module_args.update(kwargs)
     return getattr(module, module_name)(*args, **module_args)
+
+
+def bootstrap():
+    pass
+
+
+class Kernel:
+
+    def __init__(self):
+        pass
+
+
+class Trainer():
+
+    def __init__(self):
+        pass
