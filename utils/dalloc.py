@@ -1,17 +1,31 @@
-from typing import Union
 import os
+import logging
 import subprocess
-import warnings
 import torch.cuda
 
 
-class NVIDIAGPUMEMInfo:
+def auto_device(
+        num_device_desired: int = 1,
+    ):
+    logging.debug(f'trying to search for {num_device_desired} allocatable GPU(s)...')
+    __alloc = DeviceAutoAllocator()
+    try:
+        return __alloc(device_required=num_device_desired)
+    except Exception as e:
+        logging.error(f'error occurs when searching device for allocate by "{e}"')
 
-    def __init__(self, verbose=0, encoding='byte'):
-        self.verbose = verbose
-        self.__env__()
+
+class NvidiaGPUMemoryInfo:
+
+    def __init__(
+            self,
+            encoding: str = 'byte',
+            verbose: int = 0,
+        ):
         self.nvidia_gpu_memory_total = self.__smi__(query='--query-gpu=memory.total', encoding=encoding)
         self.nvidia_gpu_memory_usage = self.__smi__(query='--query-gpu=memory.used', encoding=encoding)
+        self.verbose = verbose
+        self.__env__()
 
     def __env__(self):
         if self.verbose >= 1:
@@ -20,9 +34,13 @@ class NVIDIAGPUMEMInfo:
                        'by ``export CUDA_DEVICE_ORDER=PCI_BUS_ID``; ' \
                        'Otherwise, it`s not guaranteed that the GPU index from PyTorch ' \
                        'to be consistent the ``nvidia-smi`` results.'
-                warnings.warn(warn)
+                logging.warning(warn)
 
-    def __smi__(self, query, encoding):
+    def __smi__(
+            self,
+            query: str,
+            encoding: str = 'byte'
+        ):
         res = subprocess.check_output(['nvidia-smi', query, '--format=csv,noheader'])
         res = res.decode().strip().split('\n')
         res = {x: self.convert_to_bytes(y) if encoding == 'byte' else y for x, y in enumerate(res)}
@@ -42,48 +60,34 @@ class NVIDIAGPUMEMInfo:
 
 class DeviceAutoAllocator:
 
-    # TODO: add param `required_minimum`
-
     def __init__(self):
-        self.device_dict = NVIDIAGPUMEMInfo().nvidia_gpu_memory_usage
-        self.device_dict_sorted = sorted(self.device_dict.items(), key=lambda item: item[1])
+        self.device_info = NvidiaGPUMemoryInfo()
+        self.device_used = self.device_info.nvidia_gpu_memory_usage
+        self.device_dict_sorted = sorted(self.device_used.items(), key=lambda item: item[1])
 
-    def __call__(self, device_required=1):
-        assert device_required <= len(self.device_dict_sorted), 'You are trying to allocate GPUs more than you have.'
+    def __call__(
+            self,
+            device_required: int = 1
+        ):
+        assert device_required <= len(self.device_dict_sorted), 'you are trying to allocate GPUs more than you have'
         if torch.cuda.is_available():
-            device = self.device_dict_sorted[0:device_required]
-            device = f'cuda:{device[0][0]}' if device_required == 1 else [d[0] for d in device]
-            return device
+            if device_required >= 1:
+                device = self.device_dict_sorted[0:device_required]
+                device = f'cuda:{device[0][0]}' if device_required == 1 else [d[0] for d in device]
+                logging.debug(f'finding {device_required} GPU(s) for allocating successfully')
+                return device
+            elif device_required == 0:
+                logging.info(f'it looks like you do not need a GPU, therefore we switch your device to cpu')
+                return 'cpu'
+            else:
+                raise ValueError
         else:
+            logging.warning('GPU not detected\nswitch your device to cpu automatically')
             return 'cpu'
 
 
-def auto_device(parallel: Union[bool, int] = False):
-    """Recommend GPU device by memory usage of each GPUs in the machine.
-
-    Args:
-        parallel: setting number of GPUs to use when using torch.nn.DataParallel.
-            If False, only 1 GPU with the least GPU memory usage is selected.
-
-    Examples:
-        >>> # Allocates to 1 GPU
-        >>> device = auto_device(parallel=False)
-        >>> model = torch.nn.Module()
-        >>> model.to(device)
-        >>> # Allocates to 4 GPU with torch.nn.DataParallel
-        >>> device = auto_device(parallel=True)
-        >>> model = torch.nn.Module()
-        >>> model = torch.nn.DataParallel(model, device_ids=auto_device(parallel=4))
-        >>> model.to(device)
-        >>> # Allocates to every GPU with torch.nn.DataParallel
-        >>> device = auto_device(parallel=True)
-        >>> model = torch.nn.Module()
-        >>> model = torch.nn.DataParallel(model)
-        >>> model.to(device)
-    """
-    assert isinstance(parallel, bool) or isinstance(parallel, int)
-    __alloc = DeviceAutoAllocator()
-    if isinstance(parallel, bool):
-        return __alloc(device_required=1)
-    elif isinstance(parallel, int):
-        return __alloc(device_required=parallel)
+if __name__ == '__main__':
+    import modules.engine.bootstrap as boot
+    boot.setup_logger()
+    d = auto_device(num_device_desired=-1)
+    breakpoint()

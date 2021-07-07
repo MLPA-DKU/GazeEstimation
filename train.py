@@ -4,11 +4,10 @@ import torchvision.transforms as transforms
 
 import datasets
 import models
+import modules
 
 
 def main(config):
-
-    print('\rInitializing...', end='')
 
     transform = transforms.Compose([
         transforms.ToTensor(),
@@ -21,9 +20,9 @@ def main(config):
     trainloader = loader.DataLoader(trainset, batch_size=batch_size, shuffle=True, num_workers=num_workers)
     validloader = loader.DataLoader(validset, batch_size=batch_size, shuffle=False, num_workers=num_workers)
 
-    model = ...
+    model = models.GazeCT([64, 64, 64, 128, 128, 256, 256], depth=6)
 
-    optimizer = ...
+    optimizer = modules.Lookahead(modules.RAdam(model.parameters()))
     criterion = nn.MSELoss()
     evaluator = ...
 

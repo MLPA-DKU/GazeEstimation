@@ -70,7 +70,7 @@ class Attention(nn.Module):
         attn = dots.softmax(dim=-1)
 
         fmap = torch.einsum('b h i j, b h j c -> b h i c', attn, v)
-        fmap = eo.rearrange(fmap, 'b h (x y) c -> b (h c) x y', x=h // 8, y=w // 8)
+        fmap = eo.rearrange(fmap, 'b h (x y) c -> b (h c) x y', x=h//8, y=w//8)
         fmap = self.adjust(fmap)
         return fmap
 
@@ -88,10 +88,10 @@ class Encoder(nn.Module):
         return x
 
 
-class XiT(nn.Module):
+class GazeCT(nn.Module):
 
     def __init__(self, channels, depth, heads=8, activation=nn.GELU()):
-        super(XiT, self).__init__()
+        super(GazeCT, self).__init__()
         self.stem = nn.Sequential(
             nn.Conv2d(3, channels[0], (7, 7), (2, 2), padding=3, bias=False),
             nn.BatchNorm2d(channels[0]),
