@@ -54,5 +54,3 @@ if __name__ == '__main__':
     boot.setup_logger()
     model = models.resnet18()
     summarize_model(model)
-
-

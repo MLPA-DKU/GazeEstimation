@@ -84,10 +84,3 @@ class DeviceAutoAllocator:
         else:
             logging.warning('GPU not detected\nswitch your device to cpu automatically')
             return 'cpu'
-
-
-if __name__ == '__main__':
-    import modules.engine.bootstrap as boot
-    boot.setup_logger()
-    d = auto_device(num_device_desired=-1)
-    breakpoint()

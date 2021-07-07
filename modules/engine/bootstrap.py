@@ -2,8 +2,9 @@ import logging
 
 
 def setup_logger(level=logging.INFO):
-    head = '[%(asctime)-15s] (%(filename)s:line %(lineno)d) :: %(message)s'
+    head = '\r[%(asctime)-15s] (%(filename)s:line %(lineno)d) %(name)s:%(levelname)s :: %(message)s'
     logging.basicConfig(format=head)
+    logging.StreamHandler.terminator = ''
     logger = logging.getLogger()
     logger.setLevel(level)
 
@@ -31,5 +32,8 @@ def bootstrapping():
 
 
 if __name__ == '__main__':
+    import time
     setup_logger()
-    bootstrapping()
+    for i in range(10):
+        logging.info(f'this is a message {i}')
+        time.sleep(0.5)
