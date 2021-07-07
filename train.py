@@ -54,15 +54,17 @@ def main():
     for epoch in range(epochs):
         logging.info(f'starting epoch {epoch+1:0{len(str(epochs))}d}...')
         for idx, batch in enumerate(trainloader):
-            print(f'\rtraining session is proceeding: {idx+1}/{len(trainloader)}', end='')
+            logging.StreamHandler.terminator = ''
+            logging.info(f'training session is proceeding: {idx + 1}/{len(trainloader)}')
             training_function(batch)
-        print('\r', end='')
-        logging.info(f'training session for epoch {epoch+1:0{len(str(epochs))}d} is done')
+        logging.StreamHandler.terminator = '\n'
+        logging.info(f'training session for epoch {epoch + 1:0{len(str(epochs))}d} is done')
         for idx, batch in enumerate(validloader):
-            print(f'\rvalidation session is proceeding: {idx+1}/{len(trainloader)}', end='')
+            logging.StreamHandler.terminator = ''
+            logging.info(f'validation session is proceeding: {idx + 1}/{len(validloader)}')
             validation_function(batch)
-        print('\r', end='')
-        logging.info(f'validation session for epoch {epoch+1:0{len(str(epochs))}d} is done')
+        logging.StreamHandler.terminator = '\n'
+        logging.info(f'validation session for epoch {epoch + 1:0{len(str(epochs))}d} is done')
 
 
 if __name__ == '__main__':

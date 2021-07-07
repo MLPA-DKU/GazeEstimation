@@ -3,6 +3,15 @@ import logging
 import torch.utils.tensorboard
 
 
+def switch_mode():
+    if logging.StreamHandler.terminator == '\n':
+        logging.StreamHandler.terminator = ''
+    elif logging.StreamHandler.terminator == '':
+        logging.StreamHandler.terminator = '\n'
+    else:
+        raise Exception
+
+
 class Orb:
 
     def __init__(self, volume):
