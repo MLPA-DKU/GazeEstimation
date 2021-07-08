@@ -3,9 +3,13 @@ import torch
 import torch.nn.functional as F
 
 
-def angular_error(inputs, targets, reduction='mean'):
+def angular_error(
+        inputs: torch.Tensor,
+        targets: torch.Tensor,
+        reduction: str = 'mean'
+    ) -> torch.Tensor:
 
-    def convert_to_cartesian(vector):
+    def convert_to_cartesian(vector: torch.Tensor):
         x = -1 * torch.cos(vector[:, 0]) * torch.sin(vector[:, 1])
         y = -1 * torch.sin(vector[:, 0])
         z = -1 * torch.cos(vector[:, 0]) * torch.cos(vector[:, 1])

@@ -1,5 +1,4 @@
-from .adabelief import AdaBelief
-from .lookahead import Lookahead
-from .radam import RAdam
+from modules.optimizers.lookahead import Lookahead
+from modules.optimizers.radam import RAdam
 
-__all__ = ['AdaBelief', 'Lookahead', 'RAdam']
+__all__ = ['Lookahead', 'RAdam']
