@@ -10,7 +10,9 @@ def auto_device(
     logging.debug(f'trying to search for {num_device_desired} allocatable GPU(s)...')
     __alloc = DeviceAutoAllocator()
     try:
-        return __alloc(device_required=num_device_desired)
+        device = __alloc(device_required=num_device_desired)
+        logging.debug(f'finding {num_device_desired} device for allocating successfully')
+        return device
     except Exception as e:
         logging.error(f'error occurs when searching device for allocate by "{e}"')
 

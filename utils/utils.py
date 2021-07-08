@@ -44,12 +44,3 @@ def summarize_model(model):
     #     logging.info(f'\n{summary.iloc[-1]}')
     # except Exception:
     #     logging.error('error occurs when summarizing model status by tensorwatch')
-
-
-if __name__ == '__main__':
-    import torchvision.models as models
-    import utils.bootstrap as boot
-
-    boot.setup_logger()
-    model = models.resnet18()
-    summarize_model(model)
