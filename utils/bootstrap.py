@@ -9,11 +9,6 @@ import modules
 import utils
 
 
-def this_fails():
-    # for debugging, raise 'division by zero' error
-    x = 1 / 0
-
-
 def setup_logger(level=logging.INFO):
     head = '\r[%(asctime)-15s] (%(filename)s:line %(lineno)d) %(name)s:%(levelname)s :: %(message)s'
     logging.basicConfig(format=head)

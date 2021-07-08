@@ -1,5 +1,4 @@
 import logging
-import os.path
 import random
 import numpy as np
 import torch
@@ -49,7 +48,7 @@ def summarize_model(model):
 
 if __name__ == '__main__':
     import torchvision.models as models
-    import modules.engine.bootstrap as boot
+    import utils.bootstrap as boot
 
     boot.setup_logger()
     model = models.resnet18()
