@@ -4,7 +4,7 @@ import random
 import numpy as np
 import torch
 import torch.backends.cudnn
-import tensorwatch as tw
+# import tensorwatch as tw
 
 
 def enable_easy_debug():
@@ -38,13 +38,13 @@ def summarize_model(model):
     except Exception:
         logging.error('error occurs when counting trainable parameters of given model')
 
-    try:
-        logging.info('print model status powered by tensorwatch')
-        summary = tw.model_stats(model, (1, 3, 224, 224))
-        summary.to_html(os.path.join('./', 'summary.html'))
-        logging.info(f'\n{summary.iloc[-1]}')
-    except Exception:
-        logging.error('error occurs when summarizing model status by tensorwatch')
+    # try:
+    #     logging.info('print model status powered by tensorwatch')
+    #     summary = tw.model_stats(model, (1, 3, 224, 224))
+    #     summary.to_html(os.path.join('./', 'summary.html'))
+    #     logging.info(f'\n{summary.iloc[-1]}')
+    # except Exception:
+    #     logging.error('error occurs when summarizing model status by tensorwatch')
 
 
 if __name__ == '__main__':

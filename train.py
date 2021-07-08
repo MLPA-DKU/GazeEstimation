@@ -11,7 +11,7 @@ import utils
 
 
 # temp variable
-root = '/mnt/datasets/gaze360'
+root = '/mnt/datasets/Gaze/Gaze360'
 num_workers = 8
 epochs = 100
 
@@ -36,7 +36,7 @@ def bootstrap_dataloader(updater):
 
 def main():
 
-    modules.setup_logger()
+    modules.setup_logger(level=logging.DEBUG)
     device = utils.auto_device()
 
     model = models.GazeCT([64, 64, 64, 128, 128, 256, 256], depth=6)
@@ -46,25 +46,13 @@ def main():
     criterion = nn.MSELoss()
     evaluator = modules.AngularError()
 
-    training_function = modules.update(model, optimizer, criterion, device)
-    validation_function = modules.evaluate(model, device)
-
-    trainloader, validloader = bootstrap_dataloader(training_function)
+    trainer = modules.Engine(modules.update(model, optimizer, criterion, device), [criterion, evaluator], train=True)
+    validator = modules.Engine(modules.evaluate(model, device), [criterion, evaluator], train=False)
+    trainloader, validloader = bootstrap_dataloader(trainer.process_fn)
 
     for epoch in range(epochs):
-        logging.info(f'starting epoch {epoch+1:0{len(str(epochs))}d}...')
-        for idx, batch in enumerate(trainloader):
-            logging.StreamHandler.terminator = ''
-            logging.info(f'training session is proceeding: {idx + 1}/{len(trainloader)}')
-            training_function(batch)
-        logging.StreamHandler.terminator = '\n'
-        logging.info(f'training session for epoch {epoch + 1:0{len(str(epochs))}d} is done')
-        for idx, batch in enumerate(validloader):
-            logging.StreamHandler.terminator = ''
-            logging.info(f'validation session is proceeding: {idx + 1}/{len(validloader)}')
-            validation_function(batch)
-        logging.StreamHandler.terminator = '\n'
-        logging.info(f'validation session for epoch {epoch + 1:0{len(str(epochs))}d} is done')
+        trainer(trainloader)
+        validator(validloader)
 
 
 if __name__ == '__main__':

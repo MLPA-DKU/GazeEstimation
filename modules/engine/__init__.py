@@ -1,4 +1,4 @@
 from .bootstrap import setup_logger
-from .engine import update, evaluate
+from .engine import update, evaluate, Engine
 
-__all__ = ['setup_logger', 'update', 'evaluate']
+__all__ = ['setup_logger', 'update', 'evaluate', 'Engine']
