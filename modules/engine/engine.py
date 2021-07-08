@@ -1,8 +1,10 @@
 import logging
-from typing import Callable, List, Optional, Sequence, Union
+from typing import Callable, List, Optional, Sequence, Tuple, Union
 
 import torch
 import torch.utils.data
+
+import utils
 
 
 def load_batch(
@@ -65,16 +67,19 @@ class Engine:
             self,
             process_fn: Callable,
             evaluators: Union[Callable, List[Callable]],
+            writer: utils.Orb = None,
             train: bool = False,
         ):
         self.process_fn = process_fn
         self.evaluators = evaluators if isinstance(evaluators, list) else [evaluators]
         self.engine_params = EngineParameters()
         self.engine_params.is_train = train
+        self.writer = writer
 
     def __call__(
             self,
             dataloader: torch.utils.data.DataLoader,
+            tags: Union[str, List[str], Tuple[str]],
         ):
         self.__run_at_the_init_of_epoch__()
         self.engine_params.batch_total = len(dataloader)
@@ -83,7 +88,7 @@ class Engine:
             outputs = self.process_fn(batch)
             self.engine_params.batch_idx = idx + 1
             self.engine_params.batch_outputs = [evaluator(*outputs) for evaluator in self.evaluators]
-            self.__run_at_the_term_of_batch__()
+            self.__run_at_the_term_of_batch__(tags)
         self.__run_at_the_term_of_epoch__()
 
     def __run_at_the_init_of_epoch__(self):
@@ -94,12 +99,14 @@ class Engine:
     def __run_at_the_init_of_batch__(self):
         pass
 
-    def __run_at_the_term_of_batch__(self):
+    def __run_at_the_term_of_batch__(self, tags):
         header = f'training' if self.engine_params.is_train else f'validation'
         stream = f'{header} session is proceeding: ' \
                  f'{self.engine_params.batch_idx:>{len(str(self.engine_params.batch_total))}d}/' \
                  f'{self.engine_params.batch_total}'
         logging.info(stream)
+        tags = [f'{header}_{tag}' for tag in tags]
+        self.writer.log(tags, self.engine_params.batch_outputs, self.engine_params.global_steps)
         self.engine_params.global_steps += 1
 
     def __run_at_the_term_of_epoch__(self):

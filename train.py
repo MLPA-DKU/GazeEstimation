@@ -14,6 +14,7 @@ import utils
 root = '/mnt/datasets/Gaze/Gaze360'
 num_workers = 8
 epochs = 100
+volume = 'mnt/saves/Gaze/experiment_temp'
 
 
 def bootstrap_dataloader(updater):
@@ -45,14 +46,19 @@ def main():
     optimizer = modules.Lookahead(modules.RAdam(model.parameters()))
     criterion = nn.MSELoss()
     evaluator = modules.AngularError()
+    summaries = utils.Orb(volume)
 
-    trainer = modules.Engine(modules.update(model, optimizer, criterion, device), [criterion, evaluator], train=True)
-    validator = modules.Engine(modules.evaluate(model, device), [criterion, evaluator], train=False)
+    trainer = modules.Engine(
+        modules.update(model, optimizer, criterion, device),
+        evaluators=[criterion, evaluator], writer=summaries, train=True)
+    validator = modules.Engine(
+        modules.evaluate(model, device),
+        evaluators=[criterion, evaluator], writer=summaries, train=False)
     trainloader, validloader = bootstrap_dataloader(trainer.process_fn)
 
     for epoch in range(epochs):
-        trainer(trainloader)
-        validator(validloader)
+        trainer(trainloader, ['loss', 'angular_error'])
+        validator(validloader, ['loss', 'angular_error'])
 
 
 if __name__ == '__main__':

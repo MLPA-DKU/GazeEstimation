@@ -18,5 +18,6 @@ class Orb:
         logging.debug('initializing orb to visualize model results...')
         self.writer = torch.utils.tensorboard.SummaryWriter(log_dir=volume)
 
-    def log(self, tag, value, global_step):
-        self.writer.add_scalar(tag=tag, scalar_value=value, global_step=global_step)
+    def log(self, tags, values, global_step):
+        for tag, value in zip(tags, values):
+            self.writer.add_scalar(tag=tag, scalar_value=value, global_step=global_step)
