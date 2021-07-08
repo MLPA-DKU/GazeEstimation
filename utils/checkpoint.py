@@ -9,10 +9,7 @@ def create_checkpoint_handler(
         checkpoint_obj,
         f
     ):
-    return CheckpointHandler(
-        checkpoint_obj,
-        f
-        )
+    return CheckpointHandler(checkpoint_obj, f)
 
 
 class CheckpointHandler:

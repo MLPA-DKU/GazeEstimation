@@ -1,3 +1,4 @@
+from typing import List, Union
 import os
 import logging
 import subprocess
@@ -6,7 +7,7 @@ import torch.cuda
 
 def auto_device(
         num_device_desired: int = 1,
-    ):
+    ) -> Union[int, str, torch.device, List[int]]:
     logging.debug(f'trying to search for {num_device_desired} allocatable GPU(s)...')
     __alloc = DeviceAutoAllocator()
     try:
