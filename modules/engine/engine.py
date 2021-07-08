@@ -1,9 +1,8 @@
-import logging
 from typing import Callable, List, Optional, Sequence, Tuple, Union
 
+import logging
 import torch
 import torch.utils.data
-
 import utils
 
 
