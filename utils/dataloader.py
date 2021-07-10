@@ -27,10 +27,11 @@ def auto_batch_size(
 
     candidate = None
     for n in range(10**10):
+        candidate = 2 ** n
         is_runnable = run(candidate)
         if not is_runnable:
             break
-        candidate = 2 ** n
+    candidate = candidate // 2
     logging.debug(f'the recommended batch_size is {candidate}')
 
     return candidate

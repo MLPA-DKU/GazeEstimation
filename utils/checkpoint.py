@@ -8,7 +8,7 @@ import torch
 
 
 def create_checkpoint_handler(
-        obj: Dict[str, int, torch.nn.Module, torch.optim.Optimizer],
+        obj: Dict[str, Union[int, torch.nn.Module, torch.optim.Optimizer]],
         f: Union[str, os.PathLike, BinaryIO, IO[bytes]],
     ):
     return CheckpointHandler(obj, f)
@@ -22,7 +22,7 @@ class CheckpointHandler:
 
     def __init__(
             self,
-            obj: Dict[str, int, torch.nn.Module, torch.optim.Optimizer],
+            obj: Dict[str, Union[int, torch.nn.Module, torch.optim.Optimizer]],
             f: Union[str, os.PathLike, BinaryIO, IO[bytes]],
         ):
         self.obj = obj
@@ -40,7 +40,7 @@ class CheckpointHandler:
         except Exception as e:
             logging.error(f'error occurs when saving checkpoint at {self.f} by "{e}"')
 
-    def load(self) -> Dict[str, int, torch.nn.Module, torch.optim.Optimizer]:
+    def load(self) -> Dict[str, Union[int, torch.nn.Module, torch.optim.Optimizer]]:
         try:
             logging.debug(f'trying to load checkpoint from {self.f}...')
             raise NotImplementedError
