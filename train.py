@@ -92,7 +92,7 @@ def valid(epoch, dataloader, process_fn, evaluators, writer, save_functions) -> 
     utils.disable_overlapping_logging()
     writer.log('valid_loss / epoch', np.nanmean(losses), epoch)
     writer.log('valid_angular_error / epoch', np.nanmean(scores), epoch)
-    save_functions['save'](f'checkpoint_best_perf.pth') if save_functions['perf'](np.nanmean(losses)) else None
+    save_functions['save'].save(f'checkpoint_best_perf.pth') if save_functions['perf'](np.nanmean(losses)) else None
     logging.info(f'...validation session {epoch + 1:05d} is done')
 
 
