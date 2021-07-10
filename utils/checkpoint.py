@@ -1,15 +1,21 @@
 from typing import BinaryIO, Dict, IO, Union
 
-import logging
 import os
+import logging
+
+import numpy as np
 import torch
 
 
 def create_checkpoint_handler(
-        checkpoint_obj,
-        f
+        obj: Dict[str, int, torch.nn.Module, torch.optim.Optimizer],
+        f: Union[str, os.PathLike, BinaryIO, IO[bytes]],
     ):
-    return CheckpointHandler(checkpoint_obj, f)
+    return CheckpointHandler(obj, f)
+
+
+def create_performance_meter():
+    return PerformanceMeter()
 
 
 class CheckpointHandler:
@@ -18,18 +24,18 @@ class CheckpointHandler:
             self,
             obj: Dict[str, int, torch.nn.Module, torch.optim.Optimizer],
             f: Union[str, os.PathLike, BinaryIO, IO[bytes]],
-            save_as_state_dict: bool = True,
-            save_best_model_only: bool = True,
         ):
         self.obj = obj
         self.f = f
-        self.save_state_dict = save_as_state_dict
-        self.save_best_model = save_best_model_only
 
-    def save(self) -> None:
+        if not os.path.exists(self.f):
+            os.makedirs(self.f)
+
+    def save(self, name: str = 'checkpoint.pth') -> None:
+        p = os.path.join(self.f, name)
         try:
             logging.debug(f'trying to save checkpoint at {self.f}...')
-            torch.save(self.obj, self.f)
+            torch.save(self.obj, p)
             logging.debug(f'saving checkpoint at {self.f} successfully')
         except Exception as e:
             logging.error(f'error occurs when saving checkpoint at {self.f} by "{e}"')
@@ -37,16 +43,20 @@ class CheckpointHandler:
     def load(self) -> Dict[str, int, torch.nn.Module, torch.optim.Optimizer]:
         try:
             logging.debug(f'trying to load checkpoint from {self.f}...')
-            checkpoint = torch.load(self.f, map_location='')
-            logging.debug(f'loading checkpoint from {self.f} successfully')
-            return checkpoint
+            raise NotImplementedError
+            # logging.debug(f'loading checkpoint from {self.f} successfully')
+            # return checkpoint
         except Exception as e:
             logging.error(f'error occurs when loading checkpoint from {self.f} by "{e}"')
 
 
-#
-# volume/
-#   checkpoint_best_perf.pth
-#   tfevent.out.any....
-#   config.yaml
-#
+class PerformanceMeter:
+
+    def __init__(self):
+        self.best_perf = np.inf
+
+    def __call__(self, perf: Union[torch.Tensor, float]) -> bool:
+        perf = perf.item() if isinstance(perf, torch.Tensor) else perf
+        is_best = True if perf <= self.best_perf else False
+        self.best_perf = perf if is_best else self.best_perf
+        return is_best
