@@ -12,6 +12,7 @@ import utils
 
 
 def create_dataloader_set(root, updater, num_workers=8):
+    logging.info('prepare dataloaders to train...')
     transform = transforms.Compose([
         transforms.ToTensor(),
         transforms.RandomResizedCrop(224, scale=(0.7, 1.0), ratio=(1.0, 1.0)),
@@ -22,10 +23,13 @@ def create_dataloader_set(root, updater, num_workers=8):
     batch_size = utils.auto_batch_size(trainset, updater)
     trainloader = loader.DataLoader(trainset, batch_size=batch_size, shuffle=True, num_workers=num_workers)
     validloader = loader.DataLoader(validset, batch_size=batch_size, shuffle=False, num_workers=num_workers)
+    logging.info('dataloaders are ready')
     return trainloader, validloader
 
 
 def main() -> None:
+
+    logging.info('initializing experiment session...')
 
     volume_data = '/mnt/datasets/gaze360'
     volume_save = '/mnt/experiments/gaze360/cvt-13'
@@ -49,6 +53,8 @@ def main() -> None:
         'save': utils.create_checkpoint_handler({'model': model}, volume_save),
         'perf': utils.create_performance_meter()
     }
+
+    logging.info('session is initialized successfully')
 
     for epoch in range(10000):
         train(epoch, trainloader, trainfunction, evaluator, board_writer)
