@@ -32,7 +32,7 @@ def main() -> None:
     volume_data = '/mnt/datasets/gaze360'
     volume_save = '/mnt/experiments/gaze360/cvt-13'
 
-    utils.setup_logger(logging.DEBUG)
+    utils.setup_logger()
 
     logging.info('initializing experiment session...')
     device = utils.auto_device()
@@ -51,7 +51,7 @@ def main() -> None:
     board_writer = utils.create_tensorboard_writer(volume_save)
     checkpointer = {
         'save': utils.create_checkpoint_handler({'model': model}, volume_save),
-        'perf': utils.create_performance_meter()
+        'perf': utils.create_performance_meter(),
     }
 
     logging.info('session is initialized successfully')

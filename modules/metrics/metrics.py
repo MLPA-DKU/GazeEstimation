@@ -1,19 +1,22 @@
 import torch
+import torch.nn as nn
 
 from . import fuctional as F
 
 
-class AngularError:
+class Metric(nn.Module):
 
-    def __init__(
-            self,
-            reduction: str = 'mean',
-        ):
+    def __init__(self, reduction: str = 'mean') -> None:
+        super(Metric, self).__init__()
         self.reduction = reduction
 
-    def __call__(
-            self,
-            inputs: torch.Tensor,
-            targets: torch.Tensor,
-        ) -> torch.Tensor:
+
+class AngularError(Metric):
+
+    __constants__ = ['reduction']
+
+    def __init__(self, reduction: str = 'mean') -> None:
+        super(AngularError, self).__init__(reduction)
+
+    def forward(self, inputs: torch.Tensor, targets: torch.Tensor) -> torch.Tensor:
         return F.angular_error(inputs, targets, reduction=self.reduction)
