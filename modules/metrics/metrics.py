@@ -4,14 +4,14 @@ import torch.nn as nn
 from . import fuctional as F
 
 
-class Metric(nn.Module):
+class _Metric(nn.Module):
 
     def __init__(self, reduction: str = 'mean') -> None:
-        super(Metric, self).__init__()
+        super(_Metric, self).__init__()
         self.reduction = reduction
 
 
-class AngularError(Metric):
+class AngularError(_Metric):
 
     __constants__ = ['reduction']
 
