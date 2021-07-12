@@ -1,2 +1,2 @@
-from models.cvt import *
+from models.cvt import CvT
 from models.gct import *

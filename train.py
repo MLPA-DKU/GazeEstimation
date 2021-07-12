@@ -37,7 +37,7 @@ def main() -> None:
     logging.info('initializing experiment session...')
     device = utils.auto_device()
 
-    model = models.cvt.get_cls_model(models.cvt.config)
+    model = models.CvT(num_classes=2)
     model.to(device)
 
     optimizer = modules.Lookahead(modules.RAdam(model.parameters()))

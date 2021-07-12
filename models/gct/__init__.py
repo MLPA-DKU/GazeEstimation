@@ -1,1 +1,1 @@
-from models.gct.gct import GazeCT
+from models.gct.model import GazeCT
