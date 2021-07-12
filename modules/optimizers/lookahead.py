@@ -36,7 +36,7 @@ class Lookahead(optim.Optimizer):
     def step(self, closure=None):
         r"""Performs a single optimization step.
         Arguments:
-            closure: A closure that reevaluates the models and returns the metrics.
+            closure: A closure that reevaluates the models and returns the functions.
         """
         loss = self.optimizer.step(closure=closure)
 

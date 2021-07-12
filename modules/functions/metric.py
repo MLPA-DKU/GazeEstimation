@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 
-from . import fuctional as F
+from modules.functions import fuctional as F
 
 
 class _Metric(nn.Module):
