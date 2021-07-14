@@ -32,7 +32,7 @@ def main() -> None:
     volume_data = '/mnt/datasets/gaze360'
     volume_save = '/mnt/experiments/gaze360/cvt-13'
 
-    utils.setup_logger()
+    utils.setup_logger(logging.DEBUG)
 
     logging.info('initializing experiment session...')
     device = utils.auto_device()
@@ -40,7 +40,7 @@ def main() -> None:
     model = models.CvT(num_classes=2)
     model.to(device)
 
-    optimizer = modules.Lookahead(modules.RAdam(model.parameters()))
+    optimizer = modules.RAdam(model.parameters(), lr=0.01)
     criterion = torch.nn.MSELoss()
     evaluator = [criterion, modules.AngularError()]
 

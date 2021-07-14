@@ -103,26 +103,26 @@ class Attention(nn.Module):
     def forward(self, x):
         b, n, _, y, h = *x.shape, self.heads
         q, k, v = (self.to_q(x), *self.to_kv(x).chunk(2, dim = 1))
-        q, k, v = map(lambda t: rearrange(t, 'b (h d) x y -> (b h) (x y) d', h = h), (q, k, v))
+        q, k, v = map(lambda t: rearrange(t, 'b (h d) x y -> (b h) (x y) d', h = h).contiguous(), (q, k, v))
 
-        dots = einsum('b i d, b j d -> b i j', q, k) * self.scale
+        dots = einsum('b i d, b j d -> b i j', q, k).contiguous() * self.scale
         attn = self.attend(dots)
 
         out = einsum('b i j, b j d -> b i d', attn, v)
-        out = rearrange(out, '(b h) (x y) d -> b (h d) x y', h = h, y = y)
+        out = rearrange(out, '(b h) (x y) d -> b (h d) x y', h = h, y = y).contiguous()
 
         return self.to_out(out)
 
 
 class Transformer(nn.Module):
 
-    def __init__(self, dim, proj_kernel, kv_proj_stride, depth, heads, dim_head = 64, mlp_mult = 4, dropout = 0.):
+    def __init__(self, dim, proj_kernel, kv_proj_stride, depth, heads, dim_head=64, mlp_mult=4, dropout=0.):
         super(Transformer, self).__init__()
         self.layers = nn.ModuleList([])
         for _ in range(depth):
             self.layers.append(nn.ModuleList([
-                PreNorm(dim, Attention(dim, proj_kernel = proj_kernel, kv_proj_stride = kv_proj_stride, heads = heads, dim_head = dim_head, dropout = dropout)),
-                PreNorm(dim, FeedForward(dim, mlp_mult, dropout = dropout))
+                PreNorm(dim, Attention(dim, proj_kernel=proj_kernel, kv_proj_stride=kv_proj_stride, heads=heads, dim_head=dim_head, dropout=dropout)),
+                PreNorm(dim, FeedForward(dim, mlp_mult, dropout=dropout))
             ]))
 
     def forward(self, x):
