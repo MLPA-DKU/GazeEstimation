@@ -3,7 +3,6 @@ import torch.nn as nn
 
 from torch import einsum
 from einops import rearrange
-from einops.layers.torch import Rearrange
 
 
 # helper methods
@@ -183,10 +182,12 @@ class CvT(nn.Module):
 
         self.layers = nn.Sequential(
             *layers,
-            nn.AdaptiveAvgPool2d(1),
-            Rearrange('... () () -> ...'),
-            nn.Linear(dim, num_classes)
+            nn.AdaptiveAvgPool2d(1)
         )
+        self.fc = nn.Linear(dim, num_classes)
 
     def forward(self, x):
-        return self.layers(x)
+        x = self.layers(x)
+        x = torch.flatten(x, 1)
+        x = self.fc(x)
+        return x

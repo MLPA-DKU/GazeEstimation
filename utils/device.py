@@ -12,7 +12,6 @@ def auto_device(
     __alloc = DeviceAutoAllocator()
     try:
         device = __alloc(device_required=num_device_desired)
-        logging.debug(f'finding {num_device_desired} device for allocating successfully')
         return device
     except Exception as e:
         logging.error(f'error occurs when searching device for allocate by "{e}"')

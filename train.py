@@ -3,16 +3,15 @@ import logging
 import numpy as np
 import torch.nn
 import torch.utils.data as loader
-import torchvision.models
 import torchvision.transforms as transforms
 
 import datasets
-# import models
+import models
 import modules
 import utils
 
 
-def create_dataloader_set(root, updater, num_workers=8):
+def create_dataloader_set(root, updater, batch_size=None, num_workers=8):
     logging.info('prepare dataloaders to train...')
     transform = transforms.Compose([
         transforms.ToTensor(),
@@ -21,7 +20,7 @@ def create_dataloader_set(root, updater, num_workers=8):
     ])
     trainset = datasets.Gaze360(root=root, train=True, transform=transform, mode='frame')
     validset = datasets.Gaze360(root=root, train=False, transform=transform, mode='frame')
-    batch_size = utils.auto_batch_size(trainset, updater)
+    batch_size = utils.auto_batch_size(trainset, updater) if batch_size is None else batch_size
     trainloader = loader.DataLoader(trainset, batch_size=batch_size, shuffle=True, num_workers=num_workers)
     validloader = loader.DataLoader(validset, batch_size=batch_size, shuffle=False, num_workers=num_workers)
     logging.info('dataloaders are ready')
@@ -31,23 +30,23 @@ def create_dataloader_set(root, updater, num_workers=8):
 def main() -> None:
 
     volume_data = '/mnt/datasets/gaze360'
-    volume_save = '/mnt/experiments/gaze360/resnet-18'
+    volume_save = '/mnt/experiments/gaze360/cvt-13-modified'
 
     utils.setup_logger(logging.DEBUG)
 
     logging.info('initializing experiment session...')
     device = utils.auto_device()
 
-    model = torchvision.models.resnet18(num_classes=2)
+    model = models.CvT(num_classes=2)
     model.to(device)
 
-    optimizer = modules.RAdam(model.parameters(), lr=0.01)
+    optimizer = modules.RAdam(model.parameters(), lr=0.1)
     criterion = torch.nn.MSELoss()
     evaluator = [criterion, modules.AngularError()]
 
     trainfunction = modules.update(model, optimizer, criterion, device)
     validfunction = modules.evaluate(model, device)
-    trainloader, validloader = create_dataloader_set(volume_data, trainfunction)
+    trainloader, validloader = create_dataloader_set(volume_data, trainfunction, batch_size=32)
 
     board_writer = utils.create_tensorboard_writer(volume_save)
     checkpointer = {
