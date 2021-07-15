@@ -53,7 +53,7 @@ class PreNorm(nn.Module):
 
 class FeedForward(nn.Module):
 
-    def __init__(self, dim, mult = 4, dropout = 0.):
+    def __init__(self, dim, mult=4, dropout=0.):
         super(FeedForward, self).__init__()
         self.net = nn.Sequential(
             nn.Conv2d(dim, dim * mult, 1),
@@ -92,8 +92,8 @@ class Attention(nn.Module):
 
         self.attend = nn.Softmax(dim=-1)
 
-        self.to_q = DepthWiseConv2d(dim, inner_dim, proj_kernel, padding = padding, stride = 1, bias = False)
-        self.to_kv = DepthWiseConv2d(dim, inner_dim * 2, proj_kernel, padding = padding, stride = kv_proj_stride, bias = False)
+        self.to_q = DepthWiseConv2d(dim, inner_dim, proj_kernel, padding=padding, stride=1, bias=False)
+        self.to_kv = DepthWiseConv2d(dim, inner_dim * 2, proj_kernel, padding=padding, stride=kv_proj_stride, bias=False)
 
         self.to_out = nn.Sequential(
             nn.Conv2d(inner_dim, dim, 1),
@@ -102,14 +102,14 @@ class Attention(nn.Module):
 
     def forward(self, x):
         b, n, _, y, h = *x.shape, self.heads
-        q, k, v = (self.to_q(x), *self.to_kv(x).chunk(2, dim = 1))
-        q, k, v = map(lambda t: rearrange(t, 'b (h d) x y -> (b h) (x y) d', h = h).contiguous(), (q, k, v))
+        q, k, v = (self.to_q(x), *self.to_kv(x).chunk(2, dim=1))
+        q, k, v = map(lambda t: rearrange(t, 'b (h d) x y -> (b h) (x y) d', h=h).contiguous(), (q, k, v))
 
         dots = einsum('b i d, b j d -> b i j', q, k).contiguous() * self.scale
         attn = self.attend(dots)
 
         out = einsum('b i j, b j d -> b i d', attn, v)
-        out = rearrange(out, '(b h) (x y) d -> b (h d) x y', h = h, y = y).contiguous()
+        out = rearrange(out, '(b h) (x y) d -> b (h d) x y', h=h, y=y).contiguous()
 
         return self.to_out(out)
 
@@ -138,32 +138,32 @@ class CvT(nn.Module):
         self,
         *,
         num_classes,
-        s1_emb_dim = 64,
-        s1_emb_kernel = 7,
-        s1_emb_stride = 4,
-        s1_proj_kernel = 3,
-        s1_kv_proj_stride = 2,
-        s1_heads = 1,
-        s1_depth = 1,
-        s1_mlp_mult = 4,
-        s2_emb_dim = 192,
-        s2_emb_kernel = 3,
-        s2_emb_stride = 2,
-        s2_proj_kernel = 3,
-        s2_kv_proj_stride = 2,
-        s2_heads = 3,
-        s2_depth = 2,
-        s2_mlp_mult = 4,
-        s3_emb_dim = 384,
-        s3_emb_kernel = 3,
-        s3_emb_stride = 2,
-        s3_proj_kernel = 3,
-        s3_kv_proj_stride = 2,
-        s3_heads = 6,
-        s3_depth = 10,
-        s3_mlp_mult = 4,
-        dropout = 0.
-    ):
+        s1_emb_dim=64,
+        s1_emb_kernel=7,
+        s1_emb_stride=4,
+        s1_proj_kernel=3,
+        s1_kv_proj_stride=2,
+        s1_heads=1,
+        s1_depth=1,
+        s1_mlp_mult=4,
+        s2_emb_dim=192,
+        s2_emb_kernel=3,
+        s2_emb_stride=2,
+        s2_proj_kernel=3,
+        s2_kv_proj_stride=2,
+        s2_heads=3,
+        s2_depth=2,
+        s2_mlp_mult=4,
+        s3_emb_dim=384,
+        s3_emb_kernel=3,
+        s3_emb_stride=2,
+        s3_proj_kernel=3,
+        s3_kv_proj_stride=2,
+        s3_heads=6,
+        s3_depth=10,
+        s3_mlp_mult=4,
+        dropout=0.
+        ):
         super().__init__()
         kwargs = dict(locals())
 

@@ -3,10 +3,11 @@ import logging
 import numpy as np
 import torch.nn
 import torch.utils.data as loader
+import torchvision.models
 import torchvision.transforms as transforms
 
 import datasets
-import models
+# import models
 import modules
 import utils
 
@@ -30,14 +31,14 @@ def create_dataloader_set(root, updater, num_workers=8):
 def main() -> None:
 
     volume_data = '/mnt/datasets/gaze360'
-    volume_save = '/mnt/experiments/gaze360/cvt-13'
+    volume_save = '/mnt/experiments/gaze360/resnet-18'
 
     utils.setup_logger(logging.DEBUG)
 
     logging.info('initializing experiment session...')
     device = utils.auto_device()
 
-    model = models.CvT(num_classes=2)
+    model = torchvision.models.resnet18(num_classes=2)
     model.to(device)
 
     optimizer = modules.RAdam(model.parameters(), lr=0.01)
